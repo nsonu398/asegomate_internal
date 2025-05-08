@@ -1,0 +1,56 @@
+{
+  "expo": {
+    "name": "AsegoMate",
+    "slug": "asegomate",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "helloworld",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.nsonu398.asegomate"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.nsonu398.asegomate"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "0d281467-4a0f-4294-acc0-9fb2c223225b"
+      }
+    },
+    "owner": "nsonu398",
+    "updates": {
+      "url": "https://u.expo.dev/0d281467-4a0f-4294-acc0-9fb2c223225b"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    }
+  }
+}
