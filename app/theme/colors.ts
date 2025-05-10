@@ -36,4 +36,9 @@ export const colors = {
       error: '#F44336',
       info: '#2196F3',
     },
+    // Feedback colors
+    error: {
+      light: '#4CAF50',
+      main: '#FF9800'
+    },
   };
