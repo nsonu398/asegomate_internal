@@ -2,9 +2,10 @@
 import { AppProvider } from "@/app/presentation/contexts/AppContext";
 import { useAuth } from "@/app/presentation/contexts/AuthContext";
 import { theme } from "@/app/theme";
+import * as Font from 'expo-font';
 import { Stack, useRouter, useSegments } from "expo-router";
-import React, { useEffect } from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
 // @ts-ignore - Suppress typed routes errors
 function RootNavigation() {
@@ -51,7 +52,21 @@ function RootNavigation() {
   );
 }
 
+(Text as any).defaultProps = (Text as any).defaultProps || {};
+(Text as any).defaultProps.style = { fontFamily: 'Axiforma' };
+
 export default function RootLayout() {
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  useEffect(() => {
+    Font.loadAsync({
+      'Axiforma': require('../assets/fonts/Axiforma-Regular.otf'),
+      'Axiforma-Bold': require('../assets/fonts/Axiforma-Bold.otf'),
+      'Axiforma-Medium': require('../assets/fonts/Axiforma-Medium.otf'),
+    }).then(() => setFontsLoaded(true));
+  }, []);
+
+  if (!fontsLoaded) return null;
   return (
     <AppProvider>
       <RootNavigation />

@@ -99,7 +99,7 @@ export const Button: React.FC<ButtonProps> = ({
     switch (size) {
       case 'small': return { paddingVertical: theme.spacing.xs, paddingHorizontal: theme.spacing.sm };
       case 'medium': return { paddingVertical: theme.spacing.sm, paddingHorizontal: theme.spacing.md };
-      case 'large': return { paddingVertical: theme.spacing.md, paddingHorizontal: theme.spacing.lg };
+      case 'large': return { paddingVertical: 14, paddingHorizontal: theme.spacing.lg };
       default: return { paddingVertical: theme.spacing.sm, paddingHorizontal: theme.spacing.md };
     }
   };
@@ -152,8 +152,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   text: {
-    fontSize: theme.typography.fontSize.md,
-    fontWeight: 400,
+    fontSize: theme.typography.fontSize.lg,
+    fontWeight: 600,
   },
   loader: {
     marginRight: theme.spacing.xs,

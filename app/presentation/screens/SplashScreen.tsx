@@ -4,12 +4,12 @@ import { useTheme } from '@/app/presentation/contexts/ThemeContext';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef } from 'react';
 import {
-    ActivityIndicator,
-    Animated,
-    Dimensions,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  Animated,
+  Dimensions,
+  StyleSheet,
+  Text,
+  View,
 } from 'react-native';
 
 const { height } = Dimensions.get('window');
@@ -89,7 +89,7 @@ export const SplashScreen: React.FC = () => {
             },
           ]}
         >
-          AsegoMate
+          ASEGO
         </Animated.Text>
 
         <Animated.Text

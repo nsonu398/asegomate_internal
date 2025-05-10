@@ -2,17 +2,17 @@
 export const colors = {
     // Primary brand colors
     primary: {
-      main: '#1976D2',
-      light: '#42A5F5',
-      dark: '#0D47A1',
+      main: '#00B5AD', // Teal color from ASEGO branding
+      light: '#4DD0E1',
+      dark: '#00867D',
       contrast: '#FFFFFF',
     },
-    // Secondary accent colors
+    // Secondary accent colors - Orange from logo
     secondary: {
-      main: '#FF9800',
-      light: '#FFB74D',
-      dark: '#F57C00',
-      contrast: '#000000',
+      main: '#FF6D00',
+      light: '#FF9E40',
+      dark: '#C43E00',
+      contrast: '#FFFFFF',
     },
     // Neutral colors for backgrounds, text
     neutral: {

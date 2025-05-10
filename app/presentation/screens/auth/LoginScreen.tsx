@@ -5,22 +5,27 @@ import { useAuth } from '@/app/presentation/contexts/AuthContext';
 import { useTheme } from '@/app/presentation/contexts/ThemeContext';
 import { useForm } from '@/app/presentation/hooks/useForm';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View
+  Alert,
+  Dimensions,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 interface LoginFormValues {
   email: string;
   password: string;
 }
+
+const { width, height } = Dimensions.get('window');
 
 const validateEmail = (email: string) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -38,7 +43,6 @@ const validatePassword = (password: string) => {
 export const LoginScreen: React.FC = () => {
   const { login, error, clearError } = useAuth();
   const { theme } = useTheme();
-  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
 
   const {
@@ -61,14 +65,12 @@ export const LoginScreen: React.FC = () => {
     onSubmit: async (formValues) => {
       try {
         await login(formValues.email, formValues.password);
-        // Navigation is handled in the auth context
       } catch (err) {
         Alert.alert('Login Failed', 'Please check your credentials and try again.');
       }
     },
   });
 
-  // Clear auth error when user starts typing
   React.useEffect(() => {
     if (error) {
       clearError();
@@ -76,121 +78,136 @@ export const LoginScreen: React.FC = () => {
   }, [values.email, values.password]);
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+    <View style={styles.container}>
+      <StatusBar backgroundColor={theme.colors.primary.main} barStyle="light-content" />
+      
+      {/* Green Header Section */}
+      <View style={[styles.headerSection, { backgroundColor: theme.colors.primary.main }]}>
+        
+
+        {/* Welcome Text */}
+        <View style={styles.welcomeContainer}>
+          <Text style={styles.welcomeTo}>Welcome to</Text>
+          <Text style={styles.brandName}>ASEGO</Text>
+          <Text style={styles.tagline}>Global Assistance • Travel Insurance</Text>
+        </View>
+      </View>
+
+      {/* Mascot Image */}
+      <View style={styles.mascotContainer}>
+        <Image
+          source={require('@/assets/images/icon-dolphin.png')} // You'll need to add the mascot image
+          style={styles.mascotImage}
+          resizeMode="contain"
+        />
+      </View>
+
+      <KeyboardAvoidingView
+        style={styles.formContainer}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <View style={styles.content}>
-          {/* Logo Section */}
-          <View style={styles.logoSection}>
-            <View style={[styles.logoContainer, { backgroundColor: theme.colors.primary.main }]}>
-              <Text style={[styles.logoText, { color: theme.colors.neutral.white }]}>A</Text>
-            </View>
-            <Text style={[styles.appName, { color: theme.colors.neutral.gray800 }]}>
-              AsegoMate
-            </Text>
-            <Text style={[styles.subtitle, { color: theme.colors.neutral.gray600 }]}>
-              Travel with confidence
-            </Text>
-          </View>
-
-          {/* Form Section */}
-          <View style={styles.formSection}>
-            <Text style={[styles.welcomeText, { color: theme.colors.neutral.gray800 }]}>
-              Welcome back
-            </Text>
-            <Text style={[styles.instructionText, { color: theme.colors.neutral.gray600 }]}>
-              Sign in to continue to your account
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.content}>
+            {/* Log in header */}
+            <Text style={[styles.loginHeader, { color: theme.colors.neutral.gray900 }]}>
+              Log in
             </Text>
 
+            {/* Error display */}
             {error && (
-              <View style={[styles.errorContainer, { backgroundColor: theme.colors.error.light }]}>
-                <Text style={[styles.errorText, { color: theme.colors.error.main }]}>
+              <View style={[styles.errorContainer, { backgroundColor: '#FFEBEE' }]}>
+                <Text style={[styles.errorText, { color: '#D32F2F' }]}>
                   {error}
                 </Text>
               </View>
             )}
 
-            <TextInput
-              label="Email"
-              placeholder="Enter your email"
-              value={values.email}
-              onChangeText={(text) => handleChange('email', text)}
-              onBlur={() => handleBlur('email')}
-              error={touched.email ? errors.email : undefined}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              editable={!isSubmitting}
-              startIcon={
-                <Ionicons
-                  name="mail-outline"
-                  size={20}
-                  color={theme.colors.neutral.gray500}
-                />
-              }
-            />
+            {/* Email Input */}
+            <View style={styles.inputWrapper}>
+              <Text style={[styles.inputLabel, { color: theme.colors.neutral.gray900 }]}>
+                Email address
+              </Text>
+              <TextInput
+                placeholder="eg. daniel@demoemail.com"
+                value={values.email}
+                onChangeText={(text) => handleChange('email', text)}
+                onBlur={() => handleBlur('email')}
+                error={touched.email ? errors.email : undefined}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                editable={!isSubmitting}
+                style={styles.input}
+              />
+            </View>
 
-            <TextInput
-              label="Password"
-              placeholder="Enter your password"
-              value={values.password}
-              onChangeText={(text) => handleChange('password', text)}
-              onBlur={() => handleBlur('password')}
-              error={touched.password ? errors.password : undefined}
-              secureTextEntry={!showPassword}
-              autoCapitalize="none"
-              autoCorrect={false}
-              editable={!isSubmitting}
-              startIcon={
-                <Ionicons
-                  name="lock-closed-outline"
-                  size={20}
-                  color={theme.colors.neutral.gray500}
-                />
-              }
-              endIcon={
-                <Ionicons
-                  name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                  size={20}
-                  color={theme.colors.neutral.gray500}
-                />
-              }
-              onEndIconPress={() => setShowPassword(!showPassword)}
-            />
+            {/* Password Input */}
+            <View style={styles.inputWrapper}>
+              <Text style={[styles.inputLabel, { color: theme.colors.neutral.gray900 }]}>
+                Password
+              </Text>
+              <TextInput
+                placeholder="••••••••"
+                value={values.password}
+                onChangeText={(text) => handleChange('password', text)}
+                onBlur={() => handleBlur('password')}
+                error={touched.password ? errors.password : undefined}
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
+                autoCorrect={false}
+                editable={!isSubmitting}
+                style={styles.input}
+                endIcon={
+                  <Ionicons
+                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                    size={20}
+                    color={theme.colors.neutral.gray500}
+                  />
+                }
+                onEndIconPress={() => setShowPassword(!showPassword)}
+              />
+            </View>
 
+            {/* Forgot Password Link */}
+            <TouchableOpacity style={styles.forgotPasswordContainer}>
+              <Text style={[styles.forgotPasswordText, { color: theme.colors.neutral.gray600 }]}>
+                Forgot password?
+              </Text>
+            </TouchableOpacity>
 
+            {/* Login Button */}
             <Button
-              title="Sign In"
+              title="Log in"
               onPress={handleSubmit}
               loading={isSubmitting}
               disabled={isSubmitting}
               fullWidth
               size="large"
-              style={styles.loginButton}
+              style={[styles.loginButton, { backgroundColor: theme.colors.primary.main }]}
             />
+          </View>
 
-            {/* Demo credentials info */}
-            <View style={[styles.demoInfo, { backgroundColor: theme.colors.neutral.gray100 }]}>
-              <Text style={[styles.demoText, { color: theme.colors.neutral.gray600 }]}>
-                Demo credentials:
-              </Text>
-              <Text style={[styles.demoCredentials, { color: theme.colors.neutral.gray700 }]}>
-                Email: demo@asegomate.com
-              </Text>
-              <Text style={[styles.demoCredentials, { color: theme.colors.neutral.gray700 }]}>
-                Password: demo123
-              </Text>
+          {/* Footer Section */}
+          <View style={styles.footer}>
+            <Text style={[styles.trustedBy, { color: theme.colors.neutral.gray600 }]}>
+              Trusted by <Text style={styles.highlight}>18K+</Text> Travel Trade Partners and <Text style={styles.highlight}>3M+</Text> Travellers
+            </Text>
+            
+            {/* Partner Logos */}
+            <View style={styles.partnersContainer}>
+              <Text style={[styles.partnerLogo, { color: '#00B5AD' }]}>Reliance Louvre</Text>
+              <Text style={[styles.partnerLogo, { color: '#3F51B5' }]}>IndiGo</Text>
+              <Text style={[styles.partnerLogo, { color: '#F57C00' }]}>tbo.com</Text>
+              <Text style={[styles.partnerLogo, { color: '#757575' }]}>Uniglobe</Text>
             </View>
           </View>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 };
 
@@ -199,58 +216,74 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
-  scrollContainer: {
+  headerSection: {
+    height: height * 0.28,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    paddingTop: Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 24,
+    paddingHorizontal: 20,
+  },
+  statusBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 5,
+    marginBottom: 20,
+  },
+  statusBarTime: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  statusBarIcons: {
+    flexDirection: 'row',
+    gap: 5,
+  },
+  welcomeContainer: {
+    marginTop: 30,
+  },
+  welcomeTo: {
+    color: '#FFFFFF',
+    fontSize: 24,
+    fontWeight: '400',
+  },
+  brandName: {
+    color: '#FFFFFF',
+    fontSize: 48,
+    fontWeight: '700',
+    marginTop: -5,
+  },
+  tagline: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    marginTop: 5,
+  },
+  mascotContainer: {
+    position: 'absolute',
+    right: 20,
+    top: height * 0.05,
+    zIndex: 1,
+  },
+  mascotImage: {
+    width: 180,
+    height: 280,
+  },
+  formContainer: {
+    flex: 1,
+    marginTop: -30,
+  },
+  scrollContent: {
     flexGrow: 1,
   },
   content: {
-    flex: 1,
     paddingHorizontal: 24,
-    paddingVertical: 32,
+    paddingTop: 40,
   },
-  logoSection: {
-    alignItems: 'center',
-    marginTop: 40,
-    marginBottom: 48,
-  },
-  logoContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  logoText: {
-    fontSize: 40,
-    fontWeight: 'bold',
-  },
-  appName: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 16,
-  },
-  formSection: {
-    flex: 1,
-  },
-  welcomeText: {
+  loginHeader: {
     fontSize: 32,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  instructionText: {
-    fontSize: 16,
-    marginBottom: 32,
+    fontWeight: '700',
+    marginBottom: 15,
+    marginTop:25
   },
   errorContainer: {
     padding: 12,
@@ -261,29 +294,50 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
   },
+  inputWrapper: {
+    marginBottom: 7,
+  },
+  inputLabel: {
+    fontSize: 16,
+    fontWeight: '500',
+    marginBottom: 8,
+  },
+  input: {
+    borderRadius: 8,
+  },
   forgotPasswordContainer: {
     alignSelf: 'flex-end',
     marginBottom: 24,
   },
   forgotPasswordText: {
     fontSize: 14,
-    fontWeight: '500',
   },
   loginButton: {
+    borderRadius: 12,
+    height: 52,
+  },
+  footer: {
+    paddingHorizontal: 24,
+    paddingVertical: 40,
+    marginTop: 40,
+  },
+  trustedBy: {
+    fontSize: 14,
+    textAlign: 'center',
     marginBottom: 24,
   },
-  demoInfo: {
-    padding: 16,
-    borderRadius: 8,
-    marginTop: 16,
+  highlight: {
+    color: '#FF6D00',
+    fontWeight: '700',
   },
-  demoText: {
-    fontSize: 14,
-    fontWeight: '500',
-    marginBottom: 8,
+  partnersContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 20,
   },
-  demoCredentials: {
-    fontSize: 14,
-    marginBottom: 4,
+  partnerLogo: {
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

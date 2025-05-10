@@ -2,12 +2,12 @@
 import { theme } from '@/app/theme';
 import React, { useState } from 'react';
 import {
-    TextInput as RNTextInput,
-    TextInputProps as RNTextInputProps,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  TextInput as RNTextInput,
+  TextInputProps as RNTextInputProps,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 interface TextInputProps extends RNTextInputProps {
@@ -87,9 +87,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: theme.colors.neutral.gray300,
-    borderRadius: theme.border.radius.md,
+    borderRadius: 8,
     backgroundColor: theme.colors.neutral.white,
-    paddingHorizontal: theme.spacing.sm,
+    paddingHorizontal: theme.spacing.md,
+    minHeight: 48,
   },
   input: {
     flex: 1,
