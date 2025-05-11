@@ -99,9 +99,6 @@ export const ForgotPasswordScreen: React.FC = () => {
               style={styles.logo}
               resizeMode="contain"
             />
-            <Text style={[styles.tagline, { color: theme.colors.secondary.main }]}>
-              Global Assistance • Travel Insurance
-            </Text>
           </View>
 
           {/* Form Content */}
@@ -110,9 +107,7 @@ export const ForgotPasswordScreen: React.FC = () => {
               Forgot password
             </Text>
             
-            <Text style={[styles.subtitle, { color: theme.colors.neutral.gray600 }]}>
-              Enter your email address and we'll send you a link to reset your password.
-            </Text>
+           
 
             <View style={styles.inputWrapper}>
               <Text style={[styles.inputLabel, { color: theme.colors.neutral.gray900 }]}>
@@ -168,7 +163,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    paddingTop: Platform.OS === 'ios' ? 20 : 10,
     paddingHorizontal: 16,
     paddingBottom: 16,
   },
@@ -225,10 +220,12 @@ const styles = StyleSheet.create({
   submitButton: {
     borderRadius: 12,
     height: 52,
+    position:'absolute',
+    bottom:2
   },
   footer: {
-    paddingVertical: 40,
-    marginTop: 40,
+    paddingVertical: 20,
+    marginTop: 20,
   },
   trustedBy: {
     fontSize: 14,

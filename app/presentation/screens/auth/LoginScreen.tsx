@@ -66,7 +66,8 @@ export const LoginScreen: React.FC = () => {
     },
     onSubmit: async (formValues) => {
       try {
-        await login(formValues.email, formValues.password);
+        //await login(formValues.email, formValues.password);
+        router.push('/home');
       } catch (err) {
         Alert.alert(
           "Login Failed",
@@ -207,7 +208,7 @@ export const LoginScreen: React.FC = () => {
               style={styles.forgotPasswordContainer}
               onPress={() => {
                 router.push(
-                  "/home"
+                  "/forgot-password"
                 );
               }}
             >

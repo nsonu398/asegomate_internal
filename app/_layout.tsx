@@ -14,15 +14,8 @@ function RootNavigation() {
 
   useEffect(() => {
     if (isLoading) return;
-    
-    if (!user) {
-      // Redirect to login if not authenticated
-      router.replace('/login');
-    } else if (user) {
-      // Redirect to home if authenticated but in auth screens
-      router.replace('/home');
-    }
-  }, [user, segments, isLoading]);
+    router.replace('/login')
+  }, [isLoading]);
 
   if (isLoading) {
     return (
@@ -34,10 +27,10 @@ function RootNavigation() {
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="login" options={{ headerShown: false }} />
-      <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
-      <Stack.Screen name="home" options={{ headerShown: false }} />
+      <Stack.Screen name="index" />
+      <Stack.Screen name="login" />
+      <Stack.Screen name="forgot-password" />
+      <Stack.Screen name="home" />
     </Stack>
   );
 }
