@@ -5,10 +5,8 @@ import { theme } from "@/app/theme";
 import * as Font from 'expo-font';
 import { Stack, useRouter, useSegments } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
-import { ROUTES } from "./constants/routes";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 
-// @ts-ignore - Suppress typed routes errors
 function RootNavigation() {
   const { user, isLoading } = useAuth();
   const segments = useSegments();
@@ -16,15 +14,15 @@ function RootNavigation() {
 
   useEffect(() => {
     if (isLoading) return;
-
+    
     if (!user) {
-      // @ts-ignore
-      router.replace(ROUTES.AUTH.LOGIN);
+      // Redirect to login if not authenticated
+      router.replace('/login');
     } else if (user) {
-      // @ts-ignore
-      router.replace(ROUTES.HOME);
+      // Redirect to home if authenticated but in auth screens
+      router.replace('/home');
     }
-  }, [user, segments, isLoading, router]);
+  }, [user, segments, isLoading]);
 
   if (isLoading) {
     return (
@@ -36,31 +34,13 @@ function RootNavigation() {
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-      <Stack.Screen 
-        name="/login" 
-        options={{
-          gestureEnabled: false,
-        }}
-      />
-      <Stack.Screen 
-        name="/forgot-password" 
-        options={{
-          gestureEnabled: true,
-        }}
-      />
-      <Stack.Screen 
-        name="/home"
-        options={{
-          gestureEnabled: false,
-        }}
-      />
+      <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="login" options={{ headerShown: false }} />
+      <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
+      <Stack.Screen name="home" options={{ headerShown: false }} />
     </Stack>
   );
 }
-
-(Text as any).defaultProps = (Text as any).defaultProps || {};
-(Text as any).defaultProps.style = { fontFamily: 'Axiforma' };
 
 export default function RootLayout() {
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -74,6 +54,7 @@ export default function RootLayout() {
   }, []);
 
   if (!fontsLoaded) return null;
+
   return (
     <AppProvider>
       <RootNavigation />

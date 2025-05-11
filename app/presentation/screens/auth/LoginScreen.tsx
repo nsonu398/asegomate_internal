@@ -207,7 +207,7 @@ export const LoginScreen: React.FC = () => {
               style={styles.forgotPasswordContainer}
               onPress={() => {
                 router.push(
-                  "/forgot-password"
+                  "/home"
                 );
               }}
             >
