@@ -6,6 +6,7 @@ import * as Font from 'expo-font';
 import { Stack, useRouter, useSegments } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { ROUTES } from "./constants/routes";
 
 // @ts-ignore - Suppress typed routes errors
 function RootNavigation() {
@@ -18,10 +19,10 @@ function RootNavigation() {
 
     if (!user) {
       // @ts-ignore
-      router.replace('/presentation/screens/auth/login');
+      router.replace(ROUTES.AUTH.LOGIN);
     } else if (user) {
       // @ts-ignore
-      router.replace('/home');
+      router.replace(ROUTES.HOME);
     }
   }, [user, segments, isLoading, router]);
 
@@ -37,13 +38,19 @@ function RootNavigation() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
       <Stack.Screen 
-        name="presentation/screens/auth/login" 
+        name="/login" 
         options={{
           gestureEnabled: false,
         }}
       />
       <Stack.Screen 
-        name="home" 
+        name="/forgot-password" 
+        options={{
+          gestureEnabled: true,
+        }}
+      />
+      <Stack.Screen 
+        name="/home"
         options={{
           gestureEnabled: false,
         }}

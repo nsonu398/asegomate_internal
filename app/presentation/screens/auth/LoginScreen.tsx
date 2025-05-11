@@ -1,11 +1,12 @@
 // app/presentation/screens/auth/LoginScreen.tsx
-import { Button } from '@/app/presentation/components/ui/Button';
-import { TextInput } from '@/app/presentation/components/ui/TextInput';
-import { useAuth } from '@/app/presentation/contexts/AuthContext';
-import { useTheme } from '@/app/presentation/contexts/ThemeContext';
-import { useForm } from '@/app/presentation/hooks/useForm';
-import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import { Button } from "@/app/presentation/components/ui/Button";
+import { TextInput } from "@/app/presentation/components/ui/TextInput";
+import { useAuth } from "@/app/presentation/contexts/AuthContext";
+import { useTheme } from "@/app/presentation/contexts/ThemeContext";
+import { useForm } from "@/app/presentation/hooks/useForm";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
 import {
   Alert,
   Dimensions,
@@ -17,26 +18,26 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
-} from 'react-native';
+  View,
+} from "react-native";
 
 interface LoginFormValues {
   email: string;
   password: string;
 }
 
-const { width, height } = Dimensions.get('window');
+const { width, height } = Dimensions.get("window");
 
 const validateEmail = (email: string) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!email) return 'Email is required';
-  if (!emailRegex.test(email)) return 'Please enter a valid email';
+  if (!email) return "Email is required";
+  if (!emailRegex.test(email)) return "Please enter a valid email";
   return undefined;
 };
 
 const validatePassword = (password: string) => {
-  if (!password) return 'Password is required';
-  if (password.length < 6) return 'Password must be at least 6 characters';
+  if (!password) return "Password is required";
+  if (password.length < 6) return "Password must be at least 6 characters";
   return undefined;
 };
 
@@ -44,6 +45,7 @@ export const LoginScreen: React.FC = () => {
   const { login, error, clearError } = useAuth();
   const { theme } = useTheme();
   const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
 
   const {
     values,
@@ -55,8 +57,8 @@ export const LoginScreen: React.FC = () => {
     handleSubmit,
   } = useForm<LoginFormValues>({
     initialValues: {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
     },
     validations: {
       email: validateEmail,
@@ -66,7 +68,10 @@ export const LoginScreen: React.FC = () => {
       try {
         await login(formValues.email, formValues.password);
       } catch (err) {
-        Alert.alert('Login Failed', 'Please check your credentials and try again.');
+        Alert.alert(
+          "Login Failed",
+          "Please check your credentials and try again."
+        );
       }
     },
   });
@@ -79,24 +84,32 @@ export const LoginScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <StatusBar backgroundColor={theme.colors.primary.main} barStyle="light-content" />
-      
-      {/* Green Header Section */}
-      <View style={[styles.headerSection, { backgroundColor: theme.colors.primary.main }]}>
-        
+      <StatusBar
+        backgroundColor={theme.colors.primary.main}
+        barStyle="light-content"
+      />
 
+      {/* Green Header Section */}
+      <View
+        style={[
+          styles.headerSection,
+          { backgroundColor: theme.colors.primary.main },
+        ]}
+      >
         {/* Welcome Text */}
         <View style={styles.welcomeContainer}>
           <Text style={styles.welcomeTo}>Welcome to</Text>
           <Text style={styles.brandName}>ASEGO</Text>
-          <Text style={styles.tagline}>Global Assistance • Travel Insurance</Text>
+          <Text style={styles.tagline}>
+            Global Assistance • Travel Insurance
+          </Text>
         </View>
       </View>
 
       {/* Mascot Image */}
       <View style={styles.mascotContainer}>
         <Image
-          source={require('@/assets/images/icon-dolphin.png')} // You'll need to add the mascot image
+          source={require("@/assets/images/icon-dolphin.png")} // You'll need to add the mascot image
           style={styles.mascotImage}
           resizeMode="contain"
         />
@@ -104,7 +117,7 @@ export const LoginScreen: React.FC = () => {
 
       <KeyboardAvoidingView
         style={styles.formContainer}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <ScrollView
           contentContainerStyle={styles.scrollContent}
@@ -113,14 +126,21 @@ export const LoginScreen: React.FC = () => {
         >
           <View style={styles.content}>
             {/* Log in header */}
-            <Text style={[styles.loginHeader, { color: theme.colors.neutral.gray900 }]}>
+            <Text
+              style={[
+                styles.loginHeader,
+                { color: theme.colors.neutral.gray900 },
+              ]}
+            >
               Log in
             </Text>
 
             {/* Error display */}
             {error && (
-              <View style={[styles.errorContainer, { backgroundColor: '#FFEBEE' }]}>
-                <Text style={[styles.errorText, { color: '#D32F2F' }]}>
+              <View
+                style={[styles.errorContainer, { backgroundColor: "#FFEBEE" }]}
+              >
+                <Text style={[styles.errorText, { color: "#D32F2F" }]}>
                   {error}
                 </Text>
               </View>
@@ -128,14 +148,19 @@ export const LoginScreen: React.FC = () => {
 
             {/* Email Input */}
             <View style={styles.inputWrapper}>
-              <Text style={[styles.inputLabel, { color: theme.colors.neutral.gray900 }]}>
+              <Text
+                style={[
+                  styles.inputLabel,
+                  { color: theme.colors.neutral.gray900 },
+                ]}
+              >
                 Email address
               </Text>
               <TextInput
                 placeholder="eg. daniel@demoemail.com"
                 value={values.email}
-                onChangeText={(text) => handleChange('email', text)}
-                onBlur={() => handleBlur('email')}
+                onChangeText={(text) => handleChange("email", text)}
+                onBlur={() => handleBlur("email")}
                 error={touched.email ? errors.email : undefined}
                 keyboardType="email-address"
                 autoCapitalize="none"
@@ -147,14 +172,19 @@ export const LoginScreen: React.FC = () => {
 
             {/* Password Input */}
             <View style={styles.inputWrapper}>
-              <Text style={[styles.inputLabel, { color: theme.colors.neutral.gray900 }]}>
+              <Text
+                style={[
+                  styles.inputLabel,
+                  { color: theme.colors.neutral.gray900 },
+                ]}
+              >
                 Password
               </Text>
               <TextInput
                 placeholder="••••••••"
                 value={values.password}
-                onChangeText={(text) => handleChange('password', text)}
-                onBlur={() => handleBlur('password')}
+                onChangeText={(text) => handleChange("password", text)}
+                onBlur={() => handleBlur("password")}
                 error={touched.password ? errors.password : undefined}
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
@@ -163,7 +193,7 @@ export const LoginScreen: React.FC = () => {
                 style={styles.input}
                 endIcon={
                   <Ionicons
-                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                    name={showPassword ? "eye-off-outline" : "eye-outline"}
                     size={20}
                     color={theme.colors.neutral.gray500}
                   />
@@ -173,8 +203,20 @@ export const LoginScreen: React.FC = () => {
             </View>
 
             {/* Forgot Password Link */}
-            <TouchableOpacity style={styles.forgotPasswordContainer}>
-              <Text style={[styles.forgotPasswordText, { color: theme.colors.neutral.gray600 }]}>
+            <TouchableOpacity
+              style={styles.forgotPasswordContainer}
+              onPress={() => {
+                router.push(
+                  "/forgot-password"
+                );
+              }}
+            >
+              <Text
+                style={[
+                  styles.forgotPasswordText,
+                  { color: theme.colors.neutral.gray600 },
+                ]}
+              >
                 Forgot password?
               </Text>
             </TouchableOpacity>
@@ -187,22 +229,39 @@ export const LoginScreen: React.FC = () => {
               disabled={isSubmitting}
               fullWidth
               size="large"
-              style={[styles.loginButton, { backgroundColor: theme.colors.primary.main }]}
+              style={[
+                styles.loginButton,
+                { backgroundColor: theme.colors.primary.main },
+              ]}
             />
           </View>
 
           {/* Footer Section */}
           <View style={styles.footer}>
-            <Text style={[styles.trustedBy, { color: theme.colors.neutral.gray600 }]}>
-              Trusted by <Text style={styles.highlight}>18K+</Text> Travel Trade Partners and <Text style={styles.highlight}>3M+</Text> Travellers
+            <Text
+              style={[
+                styles.trustedBy,
+                { color: theme.colors.neutral.gray600 },
+              ]}
+            >
+              Trusted by <Text style={styles.highlight}>18K+</Text> Travel Trade
+              Partners and <Text style={styles.highlight}>3M+</Text> Travellers
             </Text>
-            
+
             {/* Partner Logos */}
             <View style={styles.partnersContainer}>
-              <Text style={[styles.partnerLogo, { color: '#00B5AD' }]}>Reliance Louvre</Text>
-              <Text style={[styles.partnerLogo, { color: '#3F51B5' }]}>IndiGo</Text>
-              <Text style={[styles.partnerLogo, { color: '#F57C00' }]}>tbo.com</Text>
-              <Text style={[styles.partnerLogo, { color: '#757575' }]}>Uniglobe</Text>
+              <Text style={[styles.partnerLogo, { color: "#00B5AD" }]}>
+                Reliance Louvre
+              </Text>
+              <Text style={[styles.partnerLogo, { color: "#3F51B5" }]}>
+                IndiGo
+              </Text>
+              <Text style={[styles.partnerLogo, { color: "#F57C00" }]}>
+                tbo.com
+              </Text>
+              <Text style={[styles.partnerLogo, { color: "#757575" }]}>
+                Uniglobe
+              </Text>
             </View>
           </View>
         </ScrollView>
@@ -214,52 +273,52 @@ export const LoginScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
   },
   headerSection: {
     height: height * 0.28,
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
-    paddingTop: Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 24,
+    paddingTop: Platform.OS === "ios" ? 44 : StatusBar.currentHeight || 24,
     paddingHorizontal: 20,
   },
   statusBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 5,
     marginBottom: 20,
   },
   statusBarTime: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   statusBarIcons: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 5,
   },
   welcomeContainer: {
     marginTop: 30,
   },
   welcomeTo: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 24,
-    fontWeight: '400',
+    fontWeight: "400",
   },
   brandName: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 48,
-    fontWeight: '700',
+    fontWeight: "700",
     marginTop: -5,
   },
   tagline: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 14,
     marginTop: 5,
   },
   mascotContainer: {
-    position: 'absolute',
+    position: "absolute",
     right: 20,
     top: height * 0.05,
     zIndex: 1,
@@ -281,9 +340,9 @@ const styles = StyleSheet.create({
   },
   loginHeader: {
     fontSize: 32,
-    fontWeight: '700',
+    fontWeight: "700",
     marginBottom: 15,
-    marginTop:25
+    marginTop: 25,
   },
   errorContainer: {
     padding: 12,
@@ -292,21 +351,21 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 14,
-    textAlign: 'center',
+    textAlign: "center",
   },
   inputWrapper: {
     marginBottom: 7,
   },
   inputLabel: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
     marginBottom: 8,
   },
   input: {
     borderRadius: 8,
   },
   forgotPasswordContainer: {
-    alignSelf: 'flex-end',
+    alignSelf: "flex-end",
     marginBottom: 24,
   },
   forgotPasswordText: {
@@ -323,21 +382,21 @@ const styles = StyleSheet.create({
   },
   trustedBy: {
     fontSize: 14,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 24,
   },
   highlight: {
-    color: '#FF6D00',
-    fontWeight: '700',
+    color: "#FF6D00",
+    fontWeight: "700",
   },
   partnersContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
     gap: 20,
   },
   partnerLogo: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

@@ -1,6 +1,6 @@
 // app/index.tsx
-import { SplashScreen } from "./presentation/screens/SplashScreen";
+import LoginPage from "./login";
 
 export default function Index() {
-  return <SplashScreen />;
+  return <LoginPage />;
 }

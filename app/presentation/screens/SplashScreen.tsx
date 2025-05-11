@@ -53,7 +53,7 @@ export const SplashScreen: React.FC = () => {
         if (user) {
           router.replace('/home');
         } else {
-          router.replace('/presentation/screens/auth/login');
+          router.replace('/login');
         }
       }, 2000); // 2 second delay for splash screen
 
