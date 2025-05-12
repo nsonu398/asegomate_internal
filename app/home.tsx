@@ -1,8 +1,7 @@
 // app/home.tsx
-
-import { HomeScreen } from "./presentation/screens/HomeScreen";
+import { MainScreen } from "./presentation/screens/MainScreen";
 
 
 export default function HomePage() {
-   return <HomeScreen />;
+   return <MainScreen />;
 }
