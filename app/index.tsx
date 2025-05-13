@@ -5,22 +5,22 @@ import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
 
 export default function Index() {
-  const { user, isLoading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (!isLoading) {
-      router.replace("/login");
+      if (isAuthenticated) {
+        router.replace('/home');
+      } else {
+        router.replace('/(auth)/login');
+      }
     }
-  }, [user, isLoading]);
+  }, [isLoading, isAuthenticated, router]);
 
-  if (isLoading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
-
-  return null;
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <ActivityIndicator size="large" />
+    </View>
+  );
 }

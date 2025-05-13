@@ -3,7 +3,7 @@ import { User } from '@/app/core/domain/entities/User';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useContext, useEffect, useReducer } from 'react';
 
-interface AuthState {
+interface CreatePolicyState {
   user: User | null;
   token: string | null;
   isLoading: boolean;
@@ -11,7 +11,7 @@ interface AuthState {
   error: string | null;
 }
 
-type AuthAction =
+type CreatePolicyAction =
   | { type: 'LOGIN_START' }
   | { type: 'LOGIN_SUCCESS'; payload: { user: User; token: string } }
   | { type: 'LOGIN_FAILURE'; payload: string }
@@ -19,14 +19,14 @@ type AuthAction =
   | { type: 'CLEAR_ERROR' }
   | { type: 'RESTORE_TOKEN'; payload: { user: User | null; token: string | null } };
 
-interface AuthContextType extends AuthState {
+interface CreatePolicyContextType extends CreatePolicyState {
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   clearError: () => void;
 }
 
-const initialState: AuthState = {
+const initialState: CreatePolicyState = {
   user: null,
   token: null,
   isLoading: true,
@@ -34,7 +34,7 @@ const initialState: AuthState = {
   isAuthenticated: false
 };
 
-const authReducer = (state: AuthState, action: AuthAction): AuthState => {
+const authReducer = (state: CreatePolicyState, action: CreatePolicyAction): CreatePolicyState => {
   switch (action.type) {
     case 'LOGIN_START':
       return {
@@ -84,9 +84,9 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
   }
 };
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const CreatePolicyContext = createContext<CreatePolicyContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const CreatePolicyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
   // Attempt to restore token on app start
@@ -213,7 +213,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider
+    <CreatePolicyContext.Provider
       value={{
         ...state,
         login,
@@ -223,12 +223,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }}
     >
       {children}
-    </AuthContext.Provider>
+    </CreatePolicyContext.Provider>
   );
 };
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
+export const useCreatePolicy = () => {
+  const context = useContext(CreatePolicyContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }

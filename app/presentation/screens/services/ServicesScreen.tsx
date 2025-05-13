@@ -1,6 +1,7 @@
 // app/presentation/screens/services/ServicesScreen.tsx
 import { ServiceCard } from '@/app/presentation/components/services/ServiceCard';
 import { useTheme } from '@/app/presentation/contexts/ThemeContext';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import {
   Platform,
@@ -17,6 +18,7 @@ interface ServicesScreenProps {
 
 export const ServicesScreen: React.FC<ServicesScreenProps> = ({ onNavigate }) => {
   const { theme } = useTheme();
+  const router = useRouter();
 
   const services = [
     {
@@ -73,9 +75,10 @@ export const ServicesScreen: React.FC<ServicesScreenProps> = ({ onNavigate }) =>
             key={service.id} 
             {...service} 
             onPress={() => {
-              if (onNavigate && service.route === '/create-policy') {
-                onNavigate('create-policy');
-              }
+              // if (onNavigate && service.route === '/create-policy') {
+              //   onNavigate('create-policy');
+              // }
+              router.push("/(createPolicy)/create-policy")
             }}
           />
         ))}

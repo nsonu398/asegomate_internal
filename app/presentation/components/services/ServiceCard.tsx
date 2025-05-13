@@ -31,17 +31,13 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
   iconName,
   arrowDirection,
   route,
+  onPress
 }) => {
   const router = useRouter();
 
   const handlePress = () => {
-    // For Create Policy, navigate to the create policy screen
-    if (title === 'Create Policy') {
-      // Navigate to create policy screen
-      console.log('Navigate to create policy:', route);
-    } else {
-      // Handle other actions
-      console.log('Navigate to:', route);
+    if(onPress){
+      onPress();
     }
   };
 

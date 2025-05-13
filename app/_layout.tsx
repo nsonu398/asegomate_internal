@@ -8,14 +8,23 @@ import React, { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 
 function RootNavigation() {
-  const { user, isLoading } = useAuth();
+  const { isLoading, isAuthenticated } = useAuth();
   const segments = useSegments();
   const router = useRouter();
 
   useEffect(() => {
     if (isLoading) return;
-    router.replace('/login')
-  }, [isLoading]);
+
+    const inAuthGroup = segments[0] === '(auth)';
+
+    if (!isAuthenticated && !inAuthGroup) {
+      // User not authenticated and not in auth group - redirect to login
+      router.replace('/(auth)/login');
+    } else if (isAuthenticated && inAuthGroup) {
+      // User authenticated but in auth group - redirect to home
+      router.replace('/home');
+    }
+  }, [isLoading, isAuthenticated, segments, router]);
 
   if (isLoading) {
     return (
@@ -28,9 +37,11 @@ function RootNavigation() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
-      <Stack.Screen name="login" />
-      <Stack.Screen name="forgot-password" />
       <Stack.Screen name="home" />
+      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+      <Stack.Screen name="(createPolicy)" />
+
+      {/* Add other screens as needed */}
     </Stack>
   );
 }

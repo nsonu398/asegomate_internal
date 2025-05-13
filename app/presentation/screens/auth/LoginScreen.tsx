@@ -67,7 +67,7 @@ export const LoginScreen: React.FC = () => {
     onSubmit: async (formValues) => {
       try {
         //await login(formValues.email, formValues.password);
-        router.push('/home');
+        router.push("/home");
       } catch (err) {
         Alert.alert(
           "Login Failed",
@@ -207,9 +207,7 @@ export const LoginScreen: React.FC = () => {
             <TouchableOpacity
               style={styles.forgotPasswordContainer}
               onPress={() => {
-                router.push(
-                  "/forgot-password"
-                );
+                router.push("/forgot-password");
               }}
             >
               <Text
