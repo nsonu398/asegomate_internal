@@ -1,6 +1,7 @@
 // app/auth/login.tsx
-import { CreatePolicyScreen } from "../presentation/screens/createPolicy/CreatePolicyScreen";
 
-export default function LoginPage() {
-  return <CreatePolicyScreen />;
+import { TripDetailsScreen } from "../presentation/screens/createPolicy/TripDetailsScreen";
+
+export default function TripDetails() {
+  return <TripDetailsScreen />;
 }

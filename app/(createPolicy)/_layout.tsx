@@ -9,7 +9,7 @@ function CreatePolicyNavigation() {
     <Stack
       screenOptions={{ headerShown: false, animation: "slide_from_right" }}
     >
-      <Stack.Screen name="create-policy" />
+      <Stack.Screen name="search-destination" />
       {/* Add other screens as needed */}
     </Stack>
   );
