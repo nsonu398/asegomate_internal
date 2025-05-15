@@ -78,7 +78,7 @@ export const ServicesScreen: React.FC<ServicesScreenProps> = ({ onNavigate }) =>
               // if (onNavigate && service.route === '/create-policy') {
               //   onNavigate('create-policy');
               // }
-              router.push("/(createPolicy)/create-policy")
+              router.push("/(createPolicy)")
             }}
           />
         ))}

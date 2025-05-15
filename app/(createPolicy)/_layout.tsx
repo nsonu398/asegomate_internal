@@ -7,7 +7,6 @@ import { StyleSheet } from "react-native";
 function CreatePolicyNavigation() {
   return (
     <Stack
-      initialRouteName="create-policy"
       screenOptions={{ headerShown: false, animation: "slide_from_right" }}
     >
       <Stack.Screen name="create-policy" />
