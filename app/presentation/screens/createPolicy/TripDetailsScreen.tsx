@@ -1,24 +1,33 @@
-// app/presentation/components/createPolicy/TripDetailsForm.tsx
+// app/presentation/screens/createPolicy/TripDetailsScreen.tsx
+import { Button } from '@/app/presentation/components/ui/Button';
+import { useTheme } from '@/app/presentation/contexts/ThemeContext';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
-interface TripDetailsFormProps {
+interface TripDetailsScreenProps {
   selectedDestination?: string;
   onDestinationChange?: (destination: string) => void;
 }
 
-export const TripDetailsScreen: React.FC<TripDetailsFormProps> = ({
+const tripTypes = ['Single Trip', 'Multi Trip', 'Student', 'Special'];
+
+export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
   selectedDestination,
   onDestinationChange,
 }) => {
   const router = useRouter();
+  const { theme } = useTheme();
+  const [selectedTripType, setSelectedTripType] = useState('Single Trip');
   const [tripDays, setTripDays] = useState(1);
   const [tripDuration, setTripDuration] = useState<'180' | '365'>('180');
 
@@ -32,114 +41,183 @@ export const TripDetailsScreen: React.FC<TripDetailsFormProps> = ({
     });
   };
 
+  const handleGetQuote = () => {
+    // Handle get quote action
+    console.log('Get Quote pressed');
+  };
+
+  const handleBack = () => {
+    router.back();
+  };
+
   return (
-    <View style={styles.container}>
-      {/* Region */}
-      <View style={styles.section}>
-        <Text style={styles.sectionLabel}>REGION</Text>
-        <TouchableOpacity style={styles.selectButton}>
-          <View style={styles.selectButtonContent}>
-            <MaterialCommunityIcons name="account-outline" size={24} color="#757575" style={styles.icon} />
-            <Text style={styles.selectButtonText}>Choose a Region</Text>
-          </View>
-          <Ionicons name="chevron-down" size={24} color="#757575" />
+    <View style={[styles.container, { backgroundColor: theme.colors.neutral.background }]}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+      
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+          <Ionicons name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
+        <Text style={styles.headerTitle}>Trip Details</Text>
+        <View style={styles.placeholder} />
       </View>
 
-      {/* Destination */}
-      <View style={styles.section}>
-        <Text style={styles.sectionLabel}>DESTINATION</Text>
-        <TouchableOpacity style={styles.selectButton} onPress={handleDestinationPress}>
-          <View style={styles.selectButtonContent}>
-            <MaterialCommunityIcons name="airplane-takeoff" size={24} color="#757575" style={styles.icon} />
-            <Text style={[
-              styles.selectButtonText,
-              selectedDestination && styles.selectedText
-            ]}>
-              {selectedDestination || 'Choose a Destination'}
-            </Text>
-          </View>
-          <Ionicons name="chevron-down" size={24} color="#757575" />
-        </TouchableOpacity>
-      </View>
+      <ScrollView 
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Trip Type Selector */}
+        <View style={styles.tripTypeContainer}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.tripTypeScroll}
+          >
+            {tripTypes.map((type) => {
+              const isSelected = selectedTripType === type;
+              return (
+                <TouchableOpacity
+                  key={type}
+                  style={[
+                    styles.tripTypePill,
+                    isSelected && styles.selectedTripTypePill,
+                  ]}
+                  onPress={() => setSelectedTripType(type)}
+                >
+                  <Text
+                    style={[
+                      styles.tripTypeText,
+                      isSelected && styles.selectedTripTypeText,
+                    ]}
+                  >
+                    {type}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
 
-      {/* Trip Duration Options */}
-      <View style={styles.durationContainer}>
-        <TouchableOpacity
-          style={styles.radioContainer}
-          onPress={() => setTripDuration('180')}
-        >
-          <View style={[styles.radioOuter, tripDuration === '180' && styles.radioOuterSelected]}>
-            {tripDuration === '180' && <View style={styles.radioInner} />}
-          </View>
-          <Text style={styles.radioText}>Upto 180 Days</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.radioContainer}
-          onPress={() => setTripDuration('365')}
-        >
-          <View style={[styles.radioOuter, tripDuration === '365' && styles.radioOuterSelected]}>
-            {tripDuration === '365' && <View style={styles.radioInner} />}
-          </View>
-          <Text style={styles.radioText}>365 Days</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Date Inputs */}
-      <View style={styles.dateContainer}>
-        <View style={styles.dateSection}>
-          <Text style={styles.sectionLabel}>START DATE</Text>
-          <TouchableOpacity style={styles.dateButton}>
-            <Ionicons name="calendar-outline" size={24} color="#757575" style={styles.icon} />
-            <Text style={styles.dateButtonText}>Start Date</Text>
+        {/* Region */}
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>REGION</Text>
+          <TouchableOpacity style={styles.selectButton}>
+            <View style={styles.selectButtonContent}>
+              <MaterialCommunityIcons name="account-outline" size={24} color="#9E9E9E" style={styles.icon} />
+              <Text style={styles.selectButtonText}>Choose a Region</Text>
+            </View>
+            <Ionicons name="chevron-down" size={24} color="#9E9E9E" />
           </TouchableOpacity>
         </View>
 
-        <View style={styles.dateSection}>
-          <Text style={styles.sectionLabel}>END DATE</Text>
-          <TouchableOpacity style={styles.dateButton}>
-            <Ionicons name="calendar-outline" size={24} color="#757575" style={styles.icon} />
-            <Text style={styles.dateButtonText}>End Date</Text>
+        {/* Destination */}
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>DESTINATION</Text>
+          <TouchableOpacity style={styles.selectButton} onPress={handleDestinationPress}>
+            <View style={styles.selectButtonContent}>
+              <MaterialCommunityIcons name="airplane-takeoff" size={24} color="#9E9E9E" style={styles.icon} />
+              <Text style={[
+                styles.selectButtonText,
+                selectedDestination && styles.selectedText
+              ]}>
+                {selectedDestination || 'Choose a Destination'}
+              </Text>
+            </View>
+            <Ionicons name="chevron-down" size={24} color="#9E9E9E" />
           </TouchableOpacity>
         </View>
-      </View>
 
-      {/* Number of Trip Days */}
-      <View style={styles.section}>
-        <Text style={styles.sectionLabel}>NUMBER OF TRIP DAYS</Text>
-        <View style={styles.counterContainer}>
-          <View style={styles.counterLeft}>
-            <Ionicons name="sunny-outline" size={24} color="#757575" style={styles.icon} />
-            <Text style={styles.counterText}>{tripDays}</Text>
-          </View>
-          <View style={styles.counterButtons}>
-            <TouchableOpacity 
-              style={styles.counterButton}
-              onPress={decrementDays}
-            >
-              <Text style={styles.counterButtonText}>-</Text>
+        {/* Trip Duration Options */}
+        <View style={styles.durationContainer}>
+          <TouchableOpacity
+            style={styles.radioContainer}
+            onPress={() => setTripDuration('180')}
+          >
+            <View style={[styles.radioOuter, tripDuration === '180' && styles.radioOuterSelected]}>
+              {tripDuration === '180' && <View style={styles.radioInner} />}
+            </View>
+            <Text style={styles.radioText}>Upto 180 Days</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.radioContainer}
+            onPress={() => setTripDuration('365')}
+          >
+            <View style={[styles.radioOuter, tripDuration === '365' && styles.radioOuterSelected]}>
+              {tripDuration === '365' && <View style={styles.radioInner} />}
+            </View>
+            <Text style={styles.radioText}>365 Days</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Date Inputs */}
+        <View style={styles.dateContainer}>
+          <View style={styles.dateSection}>
+            <Text style={styles.sectionLabel}>START DATE</Text>
+            <TouchableOpacity style={styles.dateButton}>
+              <Ionicons name="calendar-outline" size={24} color="#9E9E9E" style={styles.icon} />
+              <Text style={styles.dateButtonText}>Start Date</Text>
             </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.counterButton}
-              onPress={incrementDays}
-            >
-              <Text style={styles.counterButtonText}>+</Text>
+          </View>
+
+          <View style={styles.dateSection}>
+            <Text style={styles.sectionLabel}>END DATE</Text>
+            <TouchableOpacity style={styles.dateButton}>
+              <Ionicons name="calendar-outline" size={24} color="#9E9E9E" style={styles.icon} />
+              <Text style={styles.dateButtonText}>End Date</Text>
             </TouchableOpacity>
           </View>
         </View>
-      </View>
 
-      {/* Number of Travellers */}
-      <View style={styles.section}>
-        <Text style={styles.sectionLabel}>NUMBER OF TRAVELLERS</Text>
-        <TouchableOpacity style={styles.selectButton}>
-          <View style={styles.selectButtonContent}>
-            <Ionicons name="people-outline" size={24} color="#757575" style={styles.icon} />
-            <Text style={styles.selectButtonText}>Choose No. of Travellers</Text>
+        {/* Number of Trip Days */}
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>NUMBER OF TRIP DAYS</Text>
+          <View style={styles.counterContainer}>
+            <View style={styles.counterLeft}>
+              <Ionicons name="sunny-outline" size={24} color="#9E9E9E" style={styles.icon} />
+              <Text style={styles.counterText}>{tripDays}</Text>
+            </View>
+            <View style={styles.counterButtons}>
+              <TouchableOpacity 
+                style={styles.counterButton}
+                onPress={decrementDays}
+              >
+                <Text style={styles.counterButtonText}>-</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.counterButton}
+                onPress={incrementDays}
+              >
+                <Text style={styles.counterButtonText}>+</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-          <Ionicons name="chevron-down" size={24} color="#757575" />
-        </TouchableOpacity>
+        </View>
+
+        {/* Number of Travellers */}
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>NUMBER OF TRAVELLERS</Text>
+          <TouchableOpacity style={styles.selectButton}>
+            <View style={styles.selectButtonContent}>
+              <Ionicons name="people-outline" size={24} color="#9E9E9E" style={styles.icon} />
+              <Text style={styles.selectButtonText}>Choose No. of Travellers</Text>
+            </View>
+            <Ionicons name="chevron-down" size={24} color="#9E9E9E" />
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+
+      {/* Get Quote Button */}
+      <View style={styles.buttonContainer}>
+        <Button
+          title="Get Quote"
+          onPress={handleGetQuote}
+          fullWidth
+          size="large"
+          style={[styles.getQuoteButton, { backgroundColor: theme.colors.primary.main }]}
+        />
       </View>
     </View>
   );
@@ -147,7 +225,66 @@ export const TripDetailsScreen: React.FC<TripDetailsFormProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 16,
+    flex: 1,
+    backgroundColor: '#F5F5F5',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: Platform.OS === 'ios' ? 50 : StatusBar.currentHeight || 24,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    backgroundColor: '#FFFFFF',
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#000',
+  },
+  placeholder: {
+    width: 40,
+    height: 40,
+  },
+  content: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 100, // Space for the button
+  },
+  tripTypeContainer: {
+    marginVertical: 24,
+  },
+  tripTypeScroll: {
+    paddingHorizontal: 8,
+  },
+  tripTypePill: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 25,
+    marginHorizontal: 6,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    backgroundColor: '#FFFFFF',
+  },
+  selectedTripTypePill: {
+    backgroundColor: '#E0FFFE',
+    borderColor: '#00B5AD',
+  },
+  tripTypeText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#9E9E9E',
+  },
+  selectedTripTypeText: {
+    color: '#00B5AD',
   },
   section: {
     marginBottom: 24,
@@ -178,10 +315,10 @@ const styles = StyleSheet.create({
   },
   selectButtonText: {
     fontSize: 16,
-    color: '#757575',
+    color: '#9E9E9E',
   },
   selectedText: {
-    color: '#212121',
+    color: '#000',
     fontWeight: '500',
   },
   durationContainer: {
@@ -214,7 +351,7 @@ const styles = StyleSheet.create({
   },
   radioText: {
     fontSize: 16,
-    color: '#212121',
+    color: '#000',
   },
   dateContainer: {
     flexDirection: 'row',
@@ -235,7 +372,7 @@ const styles = StyleSheet.create({
   },
   dateButtonText: {
     fontSize: 16,
-    color: '#757575',
+    color: '#9E9E9E',
   },
   counterContainer: {
     flexDirection: 'row',
@@ -253,7 +390,7 @@ const styles = StyleSheet.create({
   },
   counterText: {
     fontSize: 16,
-    color: '#212121',
+    color: '#000',
     fontWeight: '600',
   },
   counterButtons: {
@@ -268,9 +405,26 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#E0E0E0',
+    backgroundColor: '#FFFFFF',
   },
   counterButtonText: {
     fontSize: 20,
-    color: '#757575',
+    color: '#9E9E9E',
+  },
+  buttonContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 16,
+    paddingVertical: 24,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 24,
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#F0F0F0',
+  },
+  getQuoteButton: {
+    borderRadius: 12,
+    height: 52,
   },
 });
