@@ -1,11 +1,12 @@
 // app/presentation/components/home/DocsRepository.tsx
+import { useTheme } from '@/app/presentation/contexts/ThemeContext';
 import React from 'react';
 import {
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 interface RepositoryTab {
@@ -21,16 +22,42 @@ const tabs: RepositoryTab[] = [
 ];
 
 export const DocsRepository: React.FC = () => {
+  const { theme, isDarkMode } = useTheme();
+
+  // Adjust the docs repository background color for dark mode
+  const getDocsBackgroundColor = () => {
+    return isDarkMode ? '#EBF7FF' + '40' : '#EBF7FF';
+  };
+
+  const getDocsBorderColor = () => {
+    return isDarkMode ? '#0090F4' + '60' : '#0090F4';
+  };
+
+  const getTabBackgroundColor = () => {
+    return isDarkMode ? theme.colors.neutral.gray500 : theme.colors.neutral.white;
+  };
+
+  const getTabTextColor = () => {
+    return isDarkMode ? theme.colors.neutral.white : theme.colors.neutral.gray900;
+  };
+
   return (
-    <View style={[styles.docsRepository, { backgroundColor: '#EBF7FF', borderColor:'#0090F4', borderWidth:0.52 }]}>
-      <Text style={styles.docsTitle}>Docs Repository</Text>
+    <View style={[
+      styles.docsRepository, 
+      { 
+        backgroundColor: getDocsBackgroundColor(),
+        borderColor: getDocsBorderColor(),
+        borderWidth: 0.52 
+      }
+    ]}>
+      <Text style={[styles.docsTitle, { color: theme.colors.neutral.gray900 }]}>Docs Repository</Text>
       <View style={styles.docsTabs}>
         {tabs.map((tab) => (
           <TouchableOpacity
             key={tab.id}
-            style={[styles.docsTab, { backgroundColor: '#FFFFFF' }]}
+            style={[styles.docsTab, { backgroundColor: getTabBackgroundColor() }]}
           >
-            <Text style={styles.docsTabText}>{tab.title}</Text>
+            <Text style={[styles.docsTabText, { color: getTabTextColor() }]}>{tab.title}</Text>
           </TouchableOpacity>
         ))}
       </View>

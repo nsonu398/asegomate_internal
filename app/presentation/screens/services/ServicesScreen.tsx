@@ -58,16 +58,15 @@ export const ServicesScreen: React.FC<ServicesScreenProps> = ({ onNavigate }) =>
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.neutral.background }]}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Travel Assistance</Text>
-        <Text style={styles.headerTitle}>& Insurance</Text>
+      <View style={[styles.header, { backgroundColor: theme.colors.neutral.background }]}>
+        <Text style={[styles.headerTitle, { color: theme.colors.neutral.gray900 }]}>Travel Assistance</Text>
+        <Text style={[styles.headerTitle, { color: theme.colors.neutral.gray900 }]}>& Insurance</Text>
       </View>
 
       <ScrollView 
-        style={styles.content}
+        style={[styles.content, { backgroundColor: theme.colors.neutral.background }]}
         showsVerticalScrollIndicator={false}
       >
         {services.map((service) => (
@@ -75,9 +74,6 @@ export const ServicesScreen: React.FC<ServicesScreenProps> = ({ onNavigate }) =>
             key={service.id} 
             {...service} 
             onPress={() => {
-              // if (onNavigate && service.route === '/create-policy') {
-              //   onNavigate('create-policy');
-              // }
               router.push("/(createPolicy)")
             }}
           />
@@ -86,14 +82,14 @@ export const ServicesScreen: React.FC<ServicesScreenProps> = ({ onNavigate }) =>
         {/* Bottom Section */}
         <View style={styles.bottomSection}>
           <View style={styles.iconContainer}>
-            <View style={styles.umbrellaIcon}>
+            <View style={[styles.umbrellaIcon, { backgroundColor: '#E6F7FF' }]}>
               <Text style={styles.umbrellaEmoji}>☂️</Text>
             </View>
           </View>
           
-          <Text style={styles.bottomText}>
+          <Text style={[styles.bottomText, { color: theme.colors.neutral.gray500 }]}>
             Pick up where you left off the search.{' '}
-            <Text style={styles.findText}>Find</Text>
+            <Text style={[styles.findText, { color: theme.colors.primary.main }]}>Find</Text>
           </Text>
         </View>
       </ScrollView>
@@ -109,19 +105,16 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'ios' ? 60 : StatusBar.currentHeight || 40,
     paddingHorizontal: 24,
     paddingBottom: 24,
-    backgroundColor: '#FFFFFF',
     alignItems:'center'
   },
   headerTitle: {
     fontSize: 25,
     fontWeight: '700',
-    color: '#000',
     lineHeight: 29,
   },
   content: {
     flex: 1,
     paddingHorizontal: 24,
-    backgroundColor:'#FFFFFF'
   },
   bottomSection: {
     alignItems: 'center',
@@ -133,7 +126,6 @@ const styles = StyleSheet.create({
   umbrellaIcon: {
     width: 60,
     height: 60,
-    backgroundColor: '#E6F7FF',
     borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
@@ -143,11 +135,9 @@ const styles = StyleSheet.create({
   },
   bottomText: {
     fontSize: 16,
-    color: '#757575',
     textAlign: 'center',
   },
   findText: {
-    color: '#00B5AD',
     textDecorationLine: 'underline',
   },
 });

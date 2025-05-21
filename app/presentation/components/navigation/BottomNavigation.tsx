@@ -3,11 +3,11 @@ import { useTheme } from '@/app/presentation/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
-    Platform,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 interface BottomNavigationProps {
@@ -33,10 +33,20 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
   activeTab,
   onTabPress,
 }) => {
-  const { theme } = useTheme();
+  const { theme, isDarkMode } = useTheme();
+
+  // Use darker background in dark mode
+  const getNavBackgroundColor = () => {
+    return isDarkMode ? theme.colors.neutral.gray400 : theme.colors.neutral.white;
+  };
+
+  // Adjust inactive icon/text colors for dark mode
+  const getInactiveColor = () => {
+    return isDarkMode ? theme.colors.neutral.gray900 : theme.colors.neutral.gray500;
+  };
 
   return (
-    <View style={styles.bottomNavContainer}>
+    <View style={[styles.bottomNavContainer, { backgroundColor: getNavBackgroundColor() }]}>
       <View style={styles.bottomNav}>
         {navItems.map((item, index) => {
           const isActive = activeTab === item.id;
@@ -47,10 +57,16 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
               <React.Fragment key="fab">
                 <View style={styles.fabContainer}>
                   <TouchableOpacity 
-                    style={styles.fab}
+                    style={[
+                      styles.fab, 
+                      { 
+                        backgroundColor: theme.colors.secondary.main,
+                        shadowColor: theme.colors.secondary.main
+                      }
+                    ]}
                     onPress={() => onTabPress('calculator')}
                   >
-                    <Ionicons name="calculator" size={24} color="#FFF" />
+                    <Ionicons name="calculator" size={24} color={theme.colors.neutral.white} />
                   </TouchableOpacity>
                 </View>
                 <TouchableOpacity
@@ -61,12 +77,12 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
                   <Ionicons
                     name={isActive ? item.activeIcon : item.icon}
                     size={24}
-                    color={isActive ? theme.colors.primary.main : '#999999'}
+                    color={isActive ? theme.colors.primary.main : getInactiveColor()}
                   />
                   <Text
                     style={[
                       styles.navText,
-                      isActive && { color: theme.colors.primary.main },
+                      { color: isActive ? theme.colors.primary.main : getInactiveColor() },
                     ]}
                   >
                     {item.label}
@@ -85,12 +101,12 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
               <Ionicons
                 name={isActive ? item.activeIcon : item.icon}
                 size={24}
-                color={isActive ? theme.colors.primary.main : '#999999'}
+                color={isActive ? theme.colors.primary.main : getInactiveColor()}
               />
               <Text
                 style={[
                   styles.navText,
-                  isActive && { color: theme.colors.primary.main },
+                  { color: isActive ? theme.colors.primary.main : getInactiveColor() },
                 ]}
               >
                 {item.label}
@@ -109,7 +125,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     paddingTop: 15,
@@ -135,7 +150,6 @@ const styles = StyleSheet.create({
   navText: {
     fontSize: 12,
     marginTop: 4,
-    color: '#999999',
   },
   fabContainer: {
     width: 70,
@@ -147,12 +161,10 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 35,
-    backgroundColor: '#FF6D00',
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: -25,
     elevation: 8,
-    shadowColor: '#FF6D00',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

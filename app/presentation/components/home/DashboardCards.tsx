@@ -1,13 +1,14 @@
 // app/presentation/components/home/DashboardCards.tsx
+import { useTheme } from '@/app/presentation/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
-    Dimensions,
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 const { width } = Dimensions.get('window');
@@ -54,9 +55,21 @@ const cards: DashboardCard[] = [
 ];
 
 export const DashboardCards: React.FC = () => {
+  const { theme, isDarkMode } = useTheme();
+
   const handleCardPress = (card: DashboardCard) => {
     // Handle navigation here
     console.log('Navigate to:', card.route);
+  };
+
+  const getCardBackgroundColor = (backgroundColor: string) => {
+    // Reduce opacity in dark mode for brand colors
+    return isDarkMode ? backgroundColor + '80' : backgroundColor;
+  };
+
+  const getCardBorderColor = (borderColor: string) => {
+    // Reduce opacity in dark mode for brand colors
+    return isDarkMode ? borderColor + '60' : borderColor;
   };
 
   return (
@@ -67,8 +80,8 @@ export const DashboardCards: React.FC = () => {
           style={[
             styles.dashboardCard,
             { 
-              backgroundColor: card.backgroundColor,
-              borderColor: card.borderColor,
+              backgroundColor: getCardBackgroundColor(card.backgroundColor),
+              borderColor: getCardBorderColor(card.borderColor),
               borderWidth: 0.52,
             },
           ]}
@@ -76,9 +89,9 @@ export const DashboardCards: React.FC = () => {
           onPress={() => handleCardPress(card)}
         >
           <View style={styles.cardContent}>
-            <Text style={styles.cardTitle}>{card.title}</Text>
-            <View style={styles.cardArrow}>
-              <Ionicons name="arrow-forward" size={20} color="#000" />
+            <Text style={[styles.cardTitle, { color: theme.colors.neutral.gray900 }]}>{card.title}</Text>
+            <View style={[styles.cardArrow, { backgroundColor: theme.colors.neutral.white }]}>
+              <Ionicons name="arrow-forward" size={20} color={theme.colors.neutral.black} />
             </View>
           </View>
           <View style={styles.cardImageContainer}>
@@ -125,13 +138,11 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#000',
   },
   cardArrow: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#FFF',
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 2,

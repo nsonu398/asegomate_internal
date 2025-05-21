@@ -1,4 +1,5 @@
 // app/presentation/components/services/ServiceCard.tsx
+import { useTheme } from '@/app/presentation/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
@@ -33,6 +34,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
   route,
   onPress
 }) => {
+  const { theme, isDarkMode } = useTheme();
   const router = useRouter();
 
   const handlePress = () => {
@@ -41,22 +43,35 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
     }
   };
 
+  // Adjust background color opacity for dark mode
+  const getCardBackgroundColor = () => {
+    return isDarkMode ? backgroundColor + '60' : backgroundColor;
+  };
+
+  const getOptionPillBackgroundColor = () => {
+    return isDarkMode ? theme.colors.neutral.gray600 : theme.colors.neutral.white;
+  };
+
+  const getOptionTextColor = () => {
+    return isDarkMode ? theme.colors.neutral.white : theme.colors.neutral.gray900;
+  };
+
   return (
     <TouchableOpacity
-      style={[styles.card, { backgroundColor }]}
+      style={[styles.card, { backgroundColor: getCardBackgroundColor() }]}
       onPress={handlePress}
       activeOpacity={0.8}
     >
       <View style={styles.content}>
         <View style={styles.textContent}>
-          <Text style={styles.title}>{title} {title === 'Create Policy' && '✍️'}</Text>
-          <Text style={styles.subtitle}>{subtitle}</Text>
+          <Text style={[styles.title, { color: theme.colors.neutral.gray900 }]}>{title} {title === 'Create Policy' && '✍️'}</Text>
+          <Text style={[styles.subtitle, { color: theme.colors.neutral.gray700 }]}>{subtitle}</Text>
           
           {options.length > 0 && (
             <View style={styles.optionsContainer}>
               {options.map((option, index) => (
-                <View key={index} style={styles.optionPill}>
-                  <Text style={styles.optionText}>{option}</Text>
+                <View key={index} style={[styles.optionPill, { backgroundColor: getOptionPillBackgroundColor() }]}>
+                  <Text style={[styles.optionText, { color: getOptionTextColor() }]}>{option}</Text>
                 </View>
               ))}
             </View>
@@ -89,8 +104,8 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
       </View>
 
       {arrowDirection && (
-        <View style={styles.arrowContainer}>
-          <Ionicons name="arrow-forward" size={20} color="#757575" />
+        <View style={[styles.arrowContainer, { backgroundColor: theme.colors.neutral.white }]}>
+          <Ionicons name="arrow-forward" size={20} color={theme.colors.neutral.gray500} />
         </View>
       )}
     </TouchableOpacity>
@@ -116,12 +131,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#000',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 13.5,
-    color: '#000',
     marginBottom: 16,
     lineHeight: 22,
   },
@@ -130,7 +143,6 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   optionPill: {
-    backgroundColor: '#FFFFFF',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
@@ -138,7 +150,6 @@ const styles = StyleSheet.create({
   optionText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#000',
   },
   illustration: {
     width: 130,
@@ -156,7 +167,6 @@ const styles = StyleSheet.create({
     left: 20,
     width: 32,
     height: 32,
-    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',

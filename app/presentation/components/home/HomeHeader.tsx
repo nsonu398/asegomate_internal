@@ -4,11 +4,11 @@ import { useTheme } from '@/app/presentation/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
-    Platform,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 export const HomeHeader: React.FC = () => {
@@ -23,17 +23,17 @@ export const HomeHeader: React.FC = () => {
             Hey, {user?.name?.split(' ')[0] || 'User'}
           </Text>
           <Text style={[styles.tasksText, { color: theme.colors.neutral.gray600 }]}>
-            You have <Text style={styles.tasksCount}>3 tasks</Text> to work on today
+            You have <Text style={[styles.tasksCount, { color: theme.colors.primary.main }]}>3 tasks</Text> to work on today
           </Text>
         </View>
         <View style={styles.headerRight}>
           <TouchableOpacity style={styles.notificationButton}>
-            <Ionicons name="notifications" size={24} color="#000" />
-            <View style={styles.notificationBadge} />
+            <Ionicons name="notifications" size={24} color={theme.colors.neutral.gray900} />
+            <View style={[styles.notificationBadge, { backgroundColor: theme.colors.feedback.error }]} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.profileButton}>
             <View style={[styles.profileAvatar, { backgroundColor: '#FFE8E8' }]}>
-              <Text style={styles.profileAvatarText}>
+              <Text style={[styles.profileAvatarText, { color: theme.colors.secondary.main }]}>
                 {user?.name?.charAt(0).toUpperCase() || 'S'}
               </Text>
             </View>
@@ -67,7 +67,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   tasksCount: {
-    color: '#00B5AD',
     fontWeight: '600',
   },
   headerRight: {
@@ -85,7 +84,6 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#FF4444',
   },
   profileButton: {},
   profileAvatar: {
@@ -94,10 +92,10 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop:5
   },
   profileAvatarText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#FF6D00',
   },
 });

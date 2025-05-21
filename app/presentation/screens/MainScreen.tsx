@@ -1,7 +1,8 @@
 // app/presentation/screens/MainScreen.tsx
 import { BottomNavigation } from '@/app/presentation/components/navigation/BottomNavigation';
+import { useTheme } from '@/app/presentation/contexts/ThemeContext';
 import React, { useState } from 'react';
-import { Platform, SafeAreaView, StatusBar, StyleSheet, View } from 'react-native';
+import { Platform, SafeAreaView, StyleSheet, View } from 'react-native';
 import { CalculatorScreen } from './calculator/CalculatorScreen';
 import { HomeContent } from './home/HomeContent';
 import { OthersScreen } from './others/OthersScreen';
@@ -9,6 +10,7 @@ import { ServicesScreen } from './services/ServicesScreen';
 import { SmartboardScreen } from './smartboard/SmartboardScreen';
 
 export const MainScreen: React.FC = () => {
+  const { theme } = useTheme();
   const [activeTab, setActiveTab] = useState('home');
 
   const renderContent = () => {
@@ -29,8 +31,7 @@ export const MainScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.neutral.background }]}>
       <View style={styles.content}>
         {renderContent()}
       </View>
@@ -45,7 +46,6 @@ export const MainScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
   },
   content: {
     flex: 1,

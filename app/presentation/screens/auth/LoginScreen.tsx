@@ -84,7 +84,7 @@ export const LoginScreen: React.FC = () => {
   }, [values.email, values.password]);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.neutral.background }]}>
       <StatusBar
         backgroundColor={theme.colors.primary.main}
         barStyle="light-content"
@@ -99,9 +99,9 @@ export const LoginScreen: React.FC = () => {
       >
         {/* Welcome Text */}
         <View style={styles.welcomeContainer}>
-          <Text style={styles.welcomeTo}>Welcome to</Text>
-          <Text style={styles.brandName}>ASEGO</Text>
-          <Text style={styles.tagline}>
+          <Text style={[styles.welcomeTo, { color: theme.colors.neutral.white }]}>Welcome to</Text>
+          <Text style={[styles.brandName, { color: theme.colors.neutral.white }]}>ASEGO</Text>
+          <Text style={[styles.tagline, { color: theme.colors.neutral.white }]}>
             Global Assistance • Travel Insurance
           </Text>
         </View>
@@ -139,9 +139,9 @@ export const LoginScreen: React.FC = () => {
             {/* Error display */}
             {error && (
               <View
-                style={[styles.errorContainer, { backgroundColor: "#FFEBEE" }]}
+                style={[styles.errorContainer, { backgroundColor: theme.colors.feedback.error + '20' }]}
               >
-                <Text style={[styles.errorText, { color: "#D32F2F" }]}>
+                <Text style={[styles.errorText, { color: theme.colors.feedback.error }]}>
                   {error}
                 </Text>
               </View>
@@ -243,22 +243,22 @@ export const LoginScreen: React.FC = () => {
                 { color: theme.colors.neutral.gray600 },
               ]}
             >
-              Trusted by <Text style={styles.highlight}>18K+</Text> Travel Trade
-              Partners and <Text style={styles.highlight}>3M+</Text> Travellers
+              Trusted by <Text style={[styles.highlight, { color: theme.colors.secondary.main }]}>18K+</Text> Travel Trade
+              Partners and <Text style={[styles.highlight, { color: theme.colors.secondary.main }]}>3M+</Text> Travellers
             </Text>
 
             {/* Partner Logos */}
             <View style={styles.partnersContainer}>
-              <Text style={[styles.partnerLogo, { color: "#00B5AD" }]}>
+              <Text style={[styles.partnerLogo, { color: theme.colors.primary.main }]}>
                 Reliance Louvre
               </Text>
-              <Text style={[styles.partnerLogo, { color: "#3F51B5" }]}>
+              <Text style={[styles.partnerLogo, { color: '#3F51B5' }]}>
                 IndiGo
               </Text>
-              <Text style={[styles.partnerLogo, { color: "#F57C00" }]}>
+              <Text style={[styles.partnerLogo, { color: theme.colors.secondary.main }]}>
                 tbo.com
               </Text>
-              <Text style={[styles.partnerLogo, { color: "#757575" }]}>
+              <Text style={[styles.partnerLogo, { color: theme.colors.neutral.gray500 }]}>
                 Uniglobe
               </Text>
             </View>
@@ -272,7 +272,6 @@ export const LoginScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
   },
   headerSection: {
     height: height * 0.28,
@@ -289,7 +288,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   statusBarTime: {
-    color: "#FFFFFF",
     fontSize: 14,
     fontWeight: "600",
   },
@@ -301,18 +299,15 @@ const styles = StyleSheet.create({
     marginTop: 30,
   },
   welcomeTo: {
-    color: "#FFFFFF",
     fontSize: 24,
     fontWeight: "400",
   },
   brandName: {
-    color: "#FFFFFF",
     fontSize: 48,
     fontWeight: "700",
     marginTop: -5,
   },
   tagline: {
-    color: "#FFFFFF",
     fontSize: 14,
     marginTop: 5,
   },
@@ -385,7 +380,6 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   highlight: {
-    color: "#FF6D00",
     fontWeight: "700",
   },
   partnersContainer: {

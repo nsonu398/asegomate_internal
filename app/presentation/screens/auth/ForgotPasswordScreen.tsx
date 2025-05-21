@@ -106,8 +106,6 @@ export const ForgotPasswordScreen: React.FC = () => {
             <Text style={[styles.title, { color: theme.colors.neutral.gray900 }]}>
               Forgot password
             </Text>
-            
-           
 
             <View style={styles.inputWrapper}>
               <Text style={[styles.inputLabel, { color: theme.colors.neutral.gray900 }]}>
@@ -141,15 +139,15 @@ export const ForgotPasswordScreen: React.FC = () => {
           {/* Footer Section */}
           <View style={styles.footer}>
             <Text style={[styles.trustedBy, { color: theme.colors.neutral.gray600 }]}>
-              Trusted by <Text style={styles.highlight}>18K+</Text> Travel Trade Partners and <Text style={styles.highlight}>3M+</Text> Travellers
+              Trusted by <Text style={[styles.highlight, { color: theme.colors.secondary.main }]}>18K+</Text> Travel Trade Partners and <Text style={[styles.highlight, { color: theme.colors.secondary.main }]}>3M+</Text> Travellers
             </Text>
             
             {/* Partner Logos */}
             <View style={styles.partnersContainer}>
-              <Text style={[styles.partnerLogo, { color: '#00B5AD' }]}>Reliance Louvre</Text>
+              <Text style={[styles.partnerLogo, { color: theme.colors.primary.main }]}>Reliance Louvre</Text>
               <Text style={[styles.partnerLogo, { color: '#3F51B5' }]}>IndiGo</Text>
-              <Text style={[styles.partnerLogo, { color: '#F57C00' }]}>tbo.com</Text>
-              <Text style={[styles.partnerLogo, { color: '#757575' }]}>Uniglobe</Text>
+              <Text style={[styles.partnerLogo, { color: theme.colors.secondary.main }]}>tbo.com</Text>
+              <Text style={[styles.partnerLogo, { color: theme.colors.neutral.gray500 }]}>Uniglobe</Text>
             </View>
           </View>
         </ScrollView>
@@ -234,7 +232,6 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   highlight: {
-    color: '#FF6D00',
     fontWeight: '700',
   },
   partnersContainer: {
