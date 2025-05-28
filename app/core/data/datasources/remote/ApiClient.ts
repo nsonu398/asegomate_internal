@@ -1,5 +1,5 @@
-// src/core/data/datasources/remote/ApiClient.ts
-import { API_BASE_URL } from '@/app/constants/api';
+// app/core/data/datasources/remote/ApiClient.ts
+import { API_BASE_URL, API_TIMEOUT } from '@/app/constants/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface RequestOptions {
@@ -7,20 +7,31 @@ interface RequestOptions {
   headers?: Record<string, string>;
   body?: any;
   requiresAuth?: boolean;
+  timeout?: number;
 }
 
 interface ApiResponse<T> {
   data?: T;
   error?: string;
   status: number;
+  success: boolean;
+}
+
+interface ApiError {
+  message: string;
+  code?: string;
+  status?: number;
+  details?: any;
 }
 
 export class ApiClient {
   private static instance: ApiClient;
   private baseUrl: string;
+  private timeout: number;
 
   private constructor() {
     this.baseUrl = API_BASE_URL;
+    this.timeout = API_TIMEOUT;
   }
 
   public static getInstance(): ApiClient {
@@ -31,13 +42,20 @@ export class ApiClient {
   }
 
   private async getAuthToken(): Promise<string | null> {
-    return await AsyncStorage.getItem('userToken');
+    try {
+      return await AsyncStorage.getItem('userToken');
+    } catch (error) {
+      console.error('Error retrieving auth token:', error);
+      return null;
+    }
   }
 
   private async createHeaders(requiresAuth: boolean = true): Promise<Headers> {
     const headers = new Headers({
       'Content-Type': 'application/json',
       'Accept': 'application/json',
+      'Connection': 'keep-alive',
+      'DNT': '1',
     });
 
     if (requiresAuth) {
@@ -50,6 +68,38 @@ export class ApiClient {
     return headers;
   }
 
+  private createTimeoutPromise(timeout: number): Promise<never> {
+    return new Promise((_, reject) => {
+      setTimeout(() => {
+        reject(new Error('Request timeout'));
+      }, timeout);
+    });
+  }
+
+  private handleApiError(error: any, statusCode: number): ApiError {
+    // Generic error handling - can be customized based on API response format
+    if (typeof error === 'string') {
+      return {
+        message: error,
+        status: statusCode,
+      };
+    }
+
+    if (error && typeof error === 'object') {
+      return {
+        message: error.message || error.error || 'An unexpected error occurred',
+        code: error.code || error.errorCode,
+        status: statusCode,
+        details: error.details || error.data,
+      };
+    }
+
+    return {
+      message: 'An unexpected error occurred',
+      status: statusCode,
+    };
+  }
+
   public async request<T>(
     endpoint: string,
     options: RequestOptions
@@ -57,20 +107,33 @@ export class ApiClient {
     try {
       const url = `${this.baseUrl}${endpoint}`;
       const headers = await this.createHeaders(options.requiresAuth);
+      const timeout = options.timeout || this.timeout;
+
+      // Merge custom headers
+      if (options.headers) {
+        Object.entries(options.headers).forEach(([key, value]) => {
+          headers.set(key, value);
+        });
+      }
 
       const requestOptions: RequestInit = {
         method: options.method,
-        headers: { ...headers, ...options.headers },
+        headers: headers,
       };
 
       if (options.body && (options.method !== 'GET' && options.method !== 'DELETE')) {
         requestOptions.body = JSON.stringify(options.body);
       }
 
-      const response = await fetch(url, requestOptions);
-      const statusCode = response.status;
+      // Create fetch promise with timeout
+      const fetchPromise = fetch(url, requestOptions);
+      const timeoutPromise = this.createTimeoutPromise(timeout);
 
-      if (statusCode >= 200 && statusCode < 300) {
+      const response = await Promise.race([fetchPromise, timeoutPromise]);
+      const statusCode = response.status;
+      const success = statusCode >= 200 && statusCode < 300;
+
+      if (success) {
         const contentType = response.headers.get('content-type');
         let data: T;
 
@@ -83,24 +146,41 @@ export class ApiClient {
         return {
           data,
           status: statusCode,
+          success: true,
         };
       } else {
         let errorData;
         try {
-          errorData = await response.json();
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            errorData = await response.json();
+          } else {
+            errorData = await response.text();
+          }
         } catch {
           errorData = { message: response.statusText };
         }
 
+        const apiError = this.handleApiError(errorData, statusCode);
+
         return {
-          error: errorData.message || 'Something went wrong',
+          error: apiError.message,
           status: statusCode,
+          success: false,
         };
       }
     } catch (error) {
+      console.error('API Request Error:', error);
+      
+      let errorMessage = 'Network error';
+      if (error instanceof Error) {
+        errorMessage = error.message === 'Request timeout' ? 'Request timeout' : 'Network error';
+      }
+
       return {
-        error: error instanceof Error ? error.message : 'Network error',
+        error: errorMessage,
         status: 0,
+        success: false,
       };
     }
   }

@@ -1,11 +1,11 @@
-// src/constants/api.ts
-export const API_BASE_URL = 'https://api.asegomate.com/v1';
-export const API_TIMEOUT = 30000; // 30 seconds
+// app/constants/api.ts
+import { API_BASE_URL, API_TIMEOUT, CLIENT_TYPE } from './environment';
+
+export { API_BASE_URL, API_TIMEOUT, CLIENT_TYPE };
 
 export const API_ENDPOINTS = {
   AUTH: {
-    LOGIN: '/auth/login',
-    REGISTER: '/auth/register',
+    LOGIN: '/authenticate',
     REFRESH_TOKEN: '/auth/refresh-token',
     FORGOT_PASSWORD: '/auth/forgot-password',
     RESET_PASSWORD: '/auth/reset-password',

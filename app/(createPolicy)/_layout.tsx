@@ -20,6 +20,8 @@ function CreatePolicyNavigation() {
       <Stack.Screen name="traveller-details" />
       <Stack.Screen name="select-policy" />
       <Stack.Screen name="add-ons-selection" />
+      <Stack.Screen name="policy-review" />
+      <Stack.Screen name="policy-payment" />
       {/* Add other screens as needed */}
     </Stack>
   );

@@ -157,9 +157,16 @@ export const SelectPolicyScreen: React.FC = () => {
   };
 
   const handleContinue = () => {
-    // Navigate to next step or summary
-    //router.push('/(createPolicy)/summary');
-  };
+  // Navigate to policy review screen
+  router.push({
+    pathname: '/(createPolicy)/policy-review',
+    params: {
+      travellerNumber: travellerNumber,
+      selectedPlanId: insurancePlans.find(plan => plan.isSelected)?.id || '',
+      totalAmount: totalAmount.toString(),
+    }
+  });
+};
 
   const handleBack = () => {
     router.back();

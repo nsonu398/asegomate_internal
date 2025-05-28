@@ -1,6 +1,6 @@
-// src/presentation/contexts/AuthContext.tsx
+// app/presentation/contexts/AuthContext.tsx
+import diContainer from '@/app/core/di/Container';
 import { User } from '@/app/core/domain/entities/User';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useContext, useEffect, useReducer } from 'react';
 
 interface AuthState {
@@ -9,21 +9,22 @@ interface AuthState {
   isLoading: boolean;
   isAuthenticated: boolean;
   error: string | null;
+  loginResponse: any | null; // Store the full API response
 }
 
 type AuthAction =
   | { type: 'LOGIN_START' }
-  | { type: 'LOGIN_SUCCESS'; payload: { user: User; token: string } }
+  | { type: 'LOGIN_SUCCESS'; payload: { user: User | null; token: string | null; loginResponse: any } }
   | { type: 'LOGIN_FAILURE'; payload: string }
   | { type: 'LOGOUT' }
   | { type: 'CLEAR_ERROR' }
-  | { type: 'RESTORE_TOKEN'; payload: { user: User | null; token: string | null } };
+  | { type: 'RESTORE_TOKEN'; payload: { user: User | null; token: string | null; loginResponse: any | null } };
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   clearError: () => void;
+  getLoginResponse: () => any | null;
 }
 
 const initialState: AuthState = {
@@ -31,7 +32,8 @@ const initialState: AuthState = {
   token: null,
   isLoading: true,
   error: null,
-  isAuthenticated: false
+  isAuthenticated: false,
+  loginResponse: null,
 };
 
 const authReducer = (state: AuthState, action: AuthAction): AuthState => {
@@ -48,23 +50,29 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         isLoading: false,
         user: action.payload.user,
         token: action.payload.token,
+        loginResponse: action.payload.loginResponse,
         error: null,
-        isAuthenticated : true
+        isAuthenticated: true,
       };
     case 'LOGIN_FAILURE':
       return {
         ...state,
         isLoading: false,
         error: action.payload,
-        isAuthenticated : false
+        isAuthenticated: false,
+        user: null,
+        token: null,
+        loginResponse: null,
       };
     case 'LOGOUT':
       return {
         ...state,
         user: null,
         token: null,
+        loginResponse: null,
         isLoading: false,
-        isAuthenticated : false
+        isAuthenticated: false,
+        error: null,
       };
     case 'CLEAR_ERROR':
       return {
@@ -76,8 +84,9 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         ...state,
         user: action.payload.user,
         token: action.payload.token,
+        loginResponse: action.payload.loginResponse,
         isLoading: false,
-        isAuthenticated: true
+        isAuthenticated: !!(action.payload.token),
       };
     default:
       return state;
@@ -89,37 +98,28 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  // Attempt to restore token on app start
+  // Attempt to restore authentication state on app start
   useEffect(() => {
     const bootstrapAsync = async () => {
       try {
-        const storedToken = await AsyncStorage.getItem('userToken');
-        const storedUser = await AsyncStorage.getItem('userData');
+        const storedAuthData = await diContainer.getStoredAuthDataUseCase.execute();
         
-        if (storedToken && storedUser) {
-          dispatch({ 
-            type: 'RESTORE_TOKEN', 
-            payload: { 
-              token: storedToken, 
-              user: JSON.parse(storedUser) 
-            } 
-          });
-        } else {
-          dispatch({ 
-            type: 'RESTORE_TOKEN', 
-            payload: { 
-              token: null, 
-              user: null 
-            } 
-          });
-        }
-      } catch (e) {
-        console.error('Failed to restore authentication state:', e);
+        dispatch({ 
+          type: 'RESTORE_TOKEN', 
+          payload: { 
+            token: storedAuthData.token, 
+            user: storedAuthData.user,
+            loginResponse: storedAuthData.fullResponse,
+          } 
+        });
+      } catch (error) {
+        console.error('Failed to restore authentication state:', error);
         dispatch({ 
           type: 'RESTORE_TOKEN', 
           payload: { 
             token: null, 
-            user: null 
+            user: null,
+            loginResponse: null,
           } 
         });
       }
@@ -132,79 +132,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     dispatch({ type: 'LOGIN_START' });
     
     try {
-      // This would be an API call in a real app
-      // For demo purposes, we'll simulate a successful login
-      const mockUser = {
-        id: '1',
-        email,
-        name: 'Travel User',
-      };
-      const mockToken = 'mock-auth-token';
-      
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Store authentication data
-      await AsyncStorage.setItem('userToken', mockToken);
-      await AsyncStorage.setItem('userData', JSON.stringify(mockUser));
-      
-      dispatch({ 
-        type: 'LOGIN_SUCCESS', 
-        payload: { 
-          user: mockUser, 
-          token: mockToken
-        } 
+      const result = await diContainer.loginUseCase.execute({
+        userName: email, // API expects userName instead of email
+        password,
       });
-    } catch (error) {
-      dispatch({ 
-        type: 'LOGIN_FAILURE', 
-        payload: 'Invalid email or password. Please try again.' 
-      });
-    }
-  };
 
-  const register = async (name: string, email: string, password: string) => {
-    dispatch({ type: 'LOGIN_START' });
-    
-    try {
-      // This would be an API call in a real app
-      // For demo purposes, we'll simulate a successful registration
-      const mockUser = {
-        id: '1',
-        email,
-        name,
-      };
-      const mockToken = 'mock-auth-token';
-      
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Store authentication data
-      await AsyncStorage.setItem('userToken', mockToken);
-      await AsyncStorage.setItem('userData', JSON.stringify(mockUser));
-      
-      dispatch({ 
-        type: 'LOGIN_SUCCESS', 
-        payload: { 
-          user: mockUser, 
-          token: mockToken 
-        } 
-      });
+      if (result.success) {
+        dispatch({ 
+          type: 'LOGIN_SUCCESS', 
+          payload: { 
+            user: result.user || null, 
+            token: result.token || null,
+            loginResponse: result.fullResponse,
+          } 
+        });
+      } else {
+        dispatch({ 
+          type: 'LOGIN_FAILURE', 
+          payload: result.error || 'Login failed. Please try again.' 
+        });
+      }
     } catch (error) {
+      console.error('Login error in context:', error);
       dispatch({ 
         type: 'LOGIN_FAILURE', 
-        payload: 'Registration failed. Please try again.' 
+        payload: 'Network error. Please check your connection and try again.' 
       });
     }
   };
 
   const logout = async () => {
     try {
-      await AsyncStorage.removeItem('userToken');
-      await AsyncStorage.removeItem('userData');
+      await diContainer.logoutUseCase.execute();
       dispatch({ type: 'LOGOUT' });
-    } catch (e) {
-      console.error('Failed to log out:', e);
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Even if logout fails, clear local state
+      dispatch({ type: 'LOGOUT' });
     }
   };
 
@@ -212,14 +176,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     dispatch({ type: 'CLEAR_ERROR' });
   };
 
+  const getLoginResponse = () => {
+    return state.loginResponse;
+  };
+
   return (
     <AuthContext.Provider
       value={{
         ...state,
         login,
-        register,
         logout,
         clearError,
+        getLoginResponse,
       }}
     >
       {children}

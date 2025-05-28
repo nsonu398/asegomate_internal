@@ -27,7 +27,7 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
 }) => {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { theme } = useTheme();
+  const { theme, isDarkMode } = useTheme();
   
   const [selectedTripType, setSelectedTripType] = useState('Single Trip');
   const [tripDays, setTripDays] = useState(1);
@@ -129,14 +129,17 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.neutral.background }]}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+      <StatusBar 
+        barStyle={isDarkMode ? "light-content" : "dark-content"} 
+        backgroundColor={theme.colors.neutral.background} 
+      />
       
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: theme.colors.neutral.background }]}>
         <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
+          <Ionicons name="arrow-back" size={24} color={theme.colors.neutral.gray900} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Trip Details</Text>
+        <Text style={[styles.headerTitle, { color: theme.colors.neutral.gray900 }]}>Trip Details</Text>
         <View style={styles.placeholder} />
       </View>
 
@@ -159,14 +162,25 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
                   key={type}
                   style={[
                     styles.tripTypePill,
-                    isSelected && styles.selectedTripTypePill,
+                    {
+                      backgroundColor: isSelected 
+                        ? theme.colors.primary.main + '20' 
+                        : theme.colors.neutral.gray200,
+                      borderColor: isSelected 
+                        ? theme.colors.primary.main 
+                        : theme.colors.neutral.gray300,
+                    }
                   ]}
                   onPress={() => setSelectedTripType(type)}
                 >
                   <Text
                     style={[
                       styles.tripTypeText,
-                      isSelected && styles.selectedTripTypeText,
+                      {
+                        color: isSelected 
+                          ? theme.colors.primary.main 
+                          : theme.colors.neutral.gray500
+                      }
                     ]}
                   >
                     {type}
@@ -179,30 +193,62 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
 
         {/* Region */}
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>REGION</Text>
-          <TouchableOpacity style={styles.selectButton}>
+          <Text style={[styles.sectionLabel, { color: theme.colors.neutral.gray500 }]}>REGION</Text>
+          <TouchableOpacity style={[
+            styles.selectButton,
+            {
+              backgroundColor: theme.colors.neutral.gray100,
+              borderColor: theme.colors.neutral.gray300,
+            }
+          ]}>
             <View style={styles.selectButtonContent}>
-              <MaterialCommunityIcons name="account-outline" size={24} color="#9E9E9E" style={styles.icon} />
-              <Text style={styles.selectButtonText}>Choose a Region</Text>
+              <MaterialCommunityIcons 
+                name="account-outline" 
+                size={24} 
+                color={theme.colors.neutral.gray500} 
+                style={styles.icon} 
+              />
+              <Text style={[styles.selectButtonText, { color: theme.colors.neutral.gray500 }]}>
+                Choose a Region
+              </Text>
             </View>
-            <Ionicons name="chevron-down" size={24} color="#9E9E9E" />
+            <Ionicons name="chevron-down" size={24} color={theme.colors.neutral.gray500} />
           </TouchableOpacity>
         </View>
 
         {/* Destination */}
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>DESTINATION</Text>
-          <TouchableOpacity style={styles.selectButton} onPress={handleDestinationPress}>
+          <Text style={[styles.sectionLabel, { color: theme.colors.neutral.gray500 }]}>DESTINATION</Text>
+          <TouchableOpacity 
+            style={[
+              styles.selectButton,
+              {
+                backgroundColor: theme.colors.neutral.gray100,
+                borderColor: theme.colors.neutral.gray300,
+              }
+            ]} 
+            onPress={handleDestinationPress}
+          >
             <View style={styles.selectButtonContent}>
-              <MaterialCommunityIcons name="airplane-takeoff" size={24} color="#9E9E9E" style={styles.icon} />
+              <MaterialCommunityIcons 
+                name="airplane-takeoff" 
+                size={24} 
+                color={theme.colors.neutral.gray500} 
+                style={styles.icon} 
+              />
               <Text style={[
                 styles.selectButtonText,
-                selectedDestination && styles.selectedText
+                {
+                  color: selectedDestination 
+                    ? theme.colors.neutral.gray900 
+                    : theme.colors.neutral.gray500,
+                  fontWeight: selectedDestination ? '500' : '400'
+                }
               ]}>
                 {selectedDestination || 'Choose a Destination'}
               </Text>
             </View>
-            <Ionicons name="chevron-down" size={24} color="#9E9E9E" />
+            <Ionicons name="chevron-down" size={24} color={theme.colors.neutral.gray500} />
           </TouchableOpacity>
         </View>
 
@@ -212,32 +258,73 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
             style={styles.radioContainer}
             onPress={() => setTripDuration('180')}
           >
-            <View style={[styles.radioOuter, tripDuration === '180' && styles.radioOuterSelected]}>
-              {tripDuration === '180' && <View style={styles.radioInner} />}
+            <View style={[
+              styles.radioOuter, 
+              { 
+                borderColor: tripDuration === '180' 
+                  ? theme.colors.primary.main 
+                  : theme.colors.neutral.gray300 
+              }
+            ]}>
+              {tripDuration === '180' && (
+                <View style={[styles.radioInner, { backgroundColor: theme.colors.primary.main }]} />
+              )}
             </View>
-            <Text style={styles.radioText}>Upto 180 Days</Text>
+            <Text style={[styles.radioText, { color: theme.colors.neutral.gray900 }]}>
+              Upto 180 Days
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.radioContainer}
             onPress={() => setTripDuration('365')}
           >
-            <View style={[styles.radioOuter, tripDuration === '365' && styles.radioOuterSelected]}>
-              {tripDuration === '365' && <View style={styles.radioInner} />}
+            <View style={[
+              styles.radioOuter, 
+              { 
+                borderColor: tripDuration === '365' 
+                  ? theme.colors.primary.main 
+                  : theme.colors.neutral.gray300 
+              }
+            ]}>
+              {tripDuration === '365' && (
+                <View style={[styles.radioInner, { backgroundColor: theme.colors.primary.main }]} />
+              )}
             </View>
-            <Text style={styles.radioText}>365 Days</Text>
+            <Text style={[styles.radioText, { color: theme.colors.neutral.gray900 }]}>
+              365 Days
+            </Text>
           </TouchableOpacity>
         </View>
 
         {/* Date Inputs */}
         <View style={styles.dateContainer}>
           <View style={styles.dateSection}>
-            <Text style={styles.sectionLabel}>START DATE</Text>
-            <TouchableOpacity style={styles.dateButton} onPress={handleStartDatePress}>
-              <Ionicons name="calendar-outline" size={24} color="#9E9E9E" style={styles.icon} />
+            <Text style={[styles.sectionLabel, { color: theme.colors.neutral.gray500 }]}>START DATE</Text>
+            <TouchableOpacity 
+              style={[
+                styles.dateButton,
+                {
+                  backgroundColor: theme.colors.neutral.gray100,
+                  borderColor: theme.colors.neutral.gray300,
+                }
+              ]} 
+              onPress={handleStartDatePress}
+            >
+              <Ionicons 
+                name="calendar-outline" 
+                size={24} 
+                color={theme.colors.neutral.gray500} 
+                style={styles.icon} 
+              />
               <Text style={[
                 styles.dateButtonText,
-                startDate && { color: theme.colors.neutral.gray900, fontWeight: '500' }
+                {
+                  color: startDate 
+                    ? theme.colors.neutral.gray900 
+                    : theme.colors.neutral.gray500,
+                  fontWeight: startDate ? '500' : '400'
+                }
               ]}>
                 {startDate ? formatDateForDisplay(startDate) : 'Start Date'}
               </Text>
@@ -245,19 +332,33 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
           </View>
 
           <View style={styles.dateSection}>
-            <Text style={styles.sectionLabel}>END DATE</Text>
+            <Text style={[styles.sectionLabel, { color: theme.colors.neutral.gray500 }]}>END DATE</Text>
             <TouchableOpacity 
               style={[
                 styles.dateButton,
-                !startDate && styles.disabledButton
+                {
+                  backgroundColor: theme.colors.neutral.gray100,
+                  borderColor: theme.colors.neutral.gray300,
+                  opacity: !startDate ? 0.5 : 1,
+                }
               ]} 
               onPress={handleEndDatePress}
               disabled={!startDate}
             >
-              <Ionicons name="calendar-outline" size={24} color="#9E9E9E" style={styles.icon} />
+              <Ionicons 
+                name="calendar-outline" 
+                size={24} 
+                color={theme.colors.neutral.gray500} 
+                style={styles.icon} 
+              />
               <Text style={[
                 styles.dateButtonText,
-                endDate && { color: theme.colors.neutral.gray900, fontWeight: '500' }
+                {
+                  color: endDate 
+                    ? theme.colors.neutral.gray900 
+                    : theme.colors.neutral.gray500,
+                  fontWeight: endDate ? '500' : '400'
+                }
               ]}>
                 {endDate ? formatDateForDisplay(endDate) : 'End Date'}
               </Text>
@@ -267,24 +368,55 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
 
         {/* Number of Trip Days */}
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>NUMBER OF TRIP DAYS</Text>
-          <View style={styles.counterContainer}>
+          <Text style={[styles.sectionLabel, { color: theme.colors.neutral.gray500 }]}>
+            NUMBER OF TRIP DAYS
+          </Text>
+          <View style={[
+            styles.counterContainer,
+            {
+              backgroundColor: theme.colors.neutral.gray100,
+              borderColor: theme.colors.neutral.gray300,
+            }
+          ]}>
             <View style={styles.counterLeft}>
-              <Ionicons name="sunny-outline" size={24} color="#9E9E9E" style={styles.icon} />
-              <Text style={styles.counterText}>{tripDays}</Text>
+              <Ionicons 
+                name="sunny-outline" 
+                size={24} 
+                color={theme.colors.neutral.gray500} 
+                style={styles.icon} 
+              />
+              <Text style={[styles.counterText, { color: theme.colors.neutral.gray900 }]}>
+                {tripDays}
+              </Text>
             </View>
             <View style={styles.counterButtons}>
               <TouchableOpacity 
-                style={styles.counterButton}
+                style={[
+                  styles.counterButton,
+                  {
+                    backgroundColor: theme.colors.neutral.gray100,
+                    borderColor: theme.colors.neutral.gray300,
+                  }
+                ]}
                 onPress={decrementDays}
               >
-                <Text style={styles.counterButtonText}>-</Text>
+                <Text style={[styles.counterButtonText, { color: theme.colors.neutral.gray500 }]}>
+                  -
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity 
-                style={styles.counterButton}
+                style={[
+                  styles.counterButton,
+                  {
+                    backgroundColor: theme.colors.neutral.gray100,
+                    borderColor: theme.colors.neutral.gray300,
+                  }
+                ]}
                 onPress={incrementDays}
               >
-                <Text style={styles.counterButtonText}>+</Text>
+                <Text style={[styles.counterButtonText, { color: theme.colors.neutral.gray500 }]}>
+                  +
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -292,24 +424,51 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
 
         {/* Number of Travellers */}
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>NUMBER OF TRAVELLERS</Text>
-          <TouchableOpacity style={styles.selectButton} onPress={handleTravellersPress}>
+          <Text style={[styles.sectionLabel, { color: theme.colors.neutral.gray500 }]}>
+            NUMBER OF TRAVELLERS
+          </Text>
+          <TouchableOpacity 
+            style={[
+              styles.selectButton,
+              {
+                backgroundColor: theme.colors.neutral.gray100,
+                borderColor: theme.colors.neutral.gray300,
+              }
+            ]} 
+            onPress={handleTravellersPress}
+          >
             <View style={styles.selectButtonContent}>
-              <Ionicons name="people-outline" size={24} color="#9E9E9E" style={styles.icon} />
+              <Ionicons 
+                name="people-outline" 
+                size={24} 
+                color={theme.colors.neutral.gray500} 
+                style={styles.icon} 
+              />
               <Text style={[
                 styles.selectButtonText,
-                numberOfTravellers > 1 && { color: theme.colors.neutral.gray900, fontWeight: '500' }
+                {
+                  color: numberOfTravellers > 1 
+                    ? theme.colors.neutral.gray900 
+                    : theme.colors.neutral.gray500,
+                  fontWeight: numberOfTravellers > 1 ? '500' : '400'
+                }
               ]}>
                 {numberOfTravellers > 1 ? `${numberOfTravellers} Travellers` : 'Choose No. of Travellers'}
               </Text>
             </View>
-            <Ionicons name="chevron-down" size={24} color="#9E9E9E" />
+            <Ionicons name="chevron-down" size={24} color={theme.colors.neutral.gray500} />
           </TouchableOpacity>
         </View>
       </ScrollView>
 
       {/* Get Quote Button */}
-      <View style={styles.buttonContainer}>
+      <View style={[
+        styles.buttonContainer,
+        {
+          backgroundColor: theme.colors.neutral.gray100,
+          borderTopColor: theme.colors.neutral.gray200,
+        }
+      ]}>
         <Button
           title="Get Quote"
           onPress={handleGetQuote}
@@ -325,7 +484,6 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
   },
   header: {
     flexDirection: 'row',
@@ -334,7 +492,6 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'ios' ? 50 : StatusBar.currentHeight || 24,
     paddingHorizontal: 16,
     paddingBottom: 16,
-    backgroundColor: '#FFFFFF',
   },
   backButton: {
     width: 40,
@@ -345,7 +502,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#000',
   },
   placeholder: {
     width: 40,
@@ -370,20 +526,10 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     marginHorizontal: 6,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
-    backgroundColor: '#FFFFFF',
-  },
-  selectedTripTypePill: {
-    backgroundColor: '#E0FFFE',
-    borderColor: '#00B5AD',
   },
   tripTypeText: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#9E9E9E',
-  },
-  selectedTripTypeText: {
-    color: '#00B5AD',
   },
   section: {
     marginBottom: 24,
@@ -391,7 +537,6 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#9E9E9E',
     marginBottom: 8,
     letterSpacing: 0.5,
   },
@@ -400,10 +545,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 16,
-    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
   },
   selectButtonContent: {
     flexDirection: 'row',
@@ -414,11 +557,6 @@ const styles = StyleSheet.create({
   },
   selectButtonText: {
     fontSize: 16,
-    color: '#9E9E9E',
-  },
-  selectedText: {
-    color: '#000',
-    fontWeight: '500',
   },
   durationContainer: {
     flexDirection: 'row',
@@ -434,23 +572,17 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: '#E0E0E0',
     marginRight: 8,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  radioOuterSelected: {
-    borderColor: '#00B5AD',
   },
   radioInner: {
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: '#00B5AD',
   },
   radioText: {
     fontSize: 16,
-    color: '#000',
   },
   dateContainer: {
     flexDirection: 'row',
@@ -464,27 +596,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
-  },
-  disabledButton: {
-    opacity: 0.5,
   },
   dateButtonText: {
     fontSize: 16,
-    color: '#9E9E9E',
   },
   counterContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 16,
-    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
   },
   counterLeft: {
     flexDirection: 'row',
@@ -492,7 +616,6 @@ const styles = StyleSheet.create({
   },
   counterText: {
     fontSize: 16,
-    color: '#000',
     fontWeight: '600',
   },
   counterButtons: {
@@ -506,12 +629,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
-    backgroundColor: '#FFFFFF',
   },
   counterButtonText: {
     fontSize: 20,
-    color: '#9E9E9E',
   },
   buttonContainer: {
     position: 'absolute',
@@ -521,9 +641,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 24,
     paddingBottom: Platform.OS === 'ios' ? 40 : 24,
-    backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
-    borderTopColor: '#F0F0F0',
   },
   getQuoteButton: {
     borderRadius: 12,
