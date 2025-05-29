@@ -1,12 +1,13 @@
-// app/index.tsx
 import { useAuth } from "@/app/presentation/contexts/AuthContext";
-import { useRouter } from "expo-router";
+import { theme } from "@/app/theme";
+import { useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 
 export default function Index() {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  const segments = useSegments();
 
   useEffect(() => {
     if (!isLoading) {
@@ -19,8 +20,17 @@ export default function Index() {
   }, [isLoading, isAuthenticated, router]);
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <ActivityIndicator size="large" />
+    <View style={styles.container}>
+      <ActivityIndicator size="large" color={theme.colors.primary.main} />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1, 
+    justifyContent: 'center', 
+    alignItems: 'center',
+    backgroundColor: theme.colors.neutral.background,
+  },
+});

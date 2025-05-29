@@ -36,13 +36,13 @@ export class AuthRepository implements IAuthRepository {
         await localStorage.setItem('auth_full_response', response.data);
         
         // Extract token if available
-        const token = this.extractTokenFromResponse(response.data);
+        const token = response.data.token;
         if (token) {
           await localStorage.setItem('auth_token', token);
         }
 
         // Extract user info if available
-        const user = this.extractUserFromResponse(response.data);
+        const user = response.data.userDto;
         if (user) {
           await localStorage.setItem('auth_user', user);
         }

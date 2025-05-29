@@ -37,7 +37,7 @@ const validateEmail = (email: string) => {
 
 const validatePassword = (password: string) => {
   if (!password) return "Password is required";
-  if (password.length < 6) return "Password must be at least 6 characters";
+  if (password.length < 5) return "Password must be at least 6 characters";
   return undefined;
 };
 
@@ -66,7 +66,7 @@ export const LoginScreen: React.FC = () => {
     },
     onSubmit: async (formValues) => {
       try {
-        //await login(formValues.email, formValues.password);
+        await login(formValues.email, formValues.password);
         router.push("/home");
       } catch (err) {
         Alert.alert(
