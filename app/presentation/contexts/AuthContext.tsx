@@ -1,7 +1,8 @@
 // app/presentation/contexts/AuthContext.tsx
-import diContainer from '@/app/core/di/Container';
-import { User } from '@/app/core/domain/entities/User';
-import React, { createContext, useContext, useEffect, useReducer } from 'react';
+import apiClient from "@/app/core/data/datasources/remote/ApiClient";
+import diContainer from "@/app/core/di/Container";
+import { User } from "@/app/core/domain/entities/User";
+import React, { createContext, useContext, useEffect, useReducer } from "react";
 
 interface AuthState {
   user: User | null;
@@ -13,12 +14,22 @@ interface AuthState {
 }
 
 type AuthAction =
-  | { type: 'LOGIN_START' }
-  | { type: 'LOGIN_SUCCESS'; payload: { user: User | null; token: string | null; loginResponse: any } }
-  | { type: 'LOGIN_FAILURE'; payload: string }
-  | { type: 'LOGOUT' }
-  | { type: 'CLEAR_ERROR' }
-  | { type: 'RESTORE_TOKEN'; payload: { user: User | null; token: string | null; loginResponse: any | null } };
+  | { type: "LOGIN_START" }
+  | {
+      type: "LOGIN_SUCCESS";
+      payload: { user: User | null; token: string | null; loginResponse: any };
+    }
+  | { type: "LOGIN_FAILURE"; payload: string }
+  | { type: "LOGOUT" }
+  | { type: "CLEAR_ERROR" }
+  | {
+      type: "RESTORE_TOKEN";
+      payload: {
+        user: User | null;
+        token: string | null;
+        loginResponse: any | null;
+      };
+    };
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<void>;
@@ -38,13 +49,13 @@ const initialState: AuthState = {
 
 const authReducer = (state: AuthState, action: AuthAction): AuthState => {
   switch (action.type) {
-    case 'LOGIN_START':
+    case "LOGIN_START":
       return {
         ...state,
         isLoading: true,
         error: null,
       };
-    case 'LOGIN_SUCCESS':
+    case "LOGIN_SUCCESS":
       return {
         ...state,
         isLoading: false,
@@ -54,7 +65,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         error: null,
         isAuthenticated: true,
       };
-    case 'LOGIN_FAILURE':
+    case "LOGIN_FAILURE":
       return {
         ...state,
         isLoading: false,
@@ -64,7 +75,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         token: null,
         loginResponse: null,
       };
-    case 'LOGOUT':
+    case "LOGOUT":
       return {
         ...state,
         user: null,
@@ -74,19 +85,19 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         isAuthenticated: false,
         error: null,
       };
-    case 'CLEAR_ERROR':
+    case "CLEAR_ERROR":
       return {
         ...state,
         error: null,
       };
-    case 'RESTORE_TOKEN':
+    case "RESTORE_TOKEN":
       return {
         ...state,
         user: action.payload.user,
         token: action.payload.token,
         loginResponse: action.payload.loginResponse,
         isLoading: false,
-        isAuthenticated: !!(action.payload.token),
+        isAuthenticated: !!action.payload.token,
       };
     default:
       return state;
@@ -95,32 +106,35 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
   // Attempt to restore authentication state on app start
   useEffect(() => {
     const bootstrapAsync = async () => {
       try {
-        const storedAuthData = await diContainer.getStoredAuthDataUseCase.execute();
-        
-        dispatch({ 
-          type: 'RESTORE_TOKEN', 
-          payload: { 
-            token: storedAuthData.token, 
+        const storedAuthData =
+          await diContainer.getStoredAuthDataUseCase.execute();
+
+        dispatch({
+          type: "RESTORE_TOKEN",
+          payload: {
+            token: storedAuthData.token,
             user: storedAuthData.user,
             loginResponse: storedAuthData.fullResponse,
-          } 
+          },
         });
       } catch (error) {
-        console.error('Failed to restore authentication state:', error);
-        dispatch({ 
-          type: 'RESTORE_TOKEN', 
-          payload: { 
-            token: null, 
+        console.error("Failed to restore authentication state:", error);
+        dispatch({
+          type: "RESTORE_TOKEN",
+          payload: {
+            token: null,
             user: null,
             loginResponse: null,
-          } 
+          },
         });
       }
     };
@@ -128,9 +142,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     bootstrapAsync();
   }, []);
 
+  useEffect(() => {
+    // Set up 401 error handling
+    apiClient.setUnauthorizedCallback(() => {
+      logout();
+    });
+  }, []);
+
+  useEffect(() => {
+    console.log("Auth state changed:", state);
+  }, [state]);
+
   const login = async (email: string, password: string) => {
-    dispatch({ type: 'LOGIN_START' });
-    
+    dispatch({ type: "LOGIN_START" });
+
     try {
       const result = await diContainer.loginUseCase.execute({
         userName: email, // API expects userName instead of email
@@ -138,25 +163,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (result.success) {
-        dispatch({ 
-          type: 'LOGIN_SUCCESS', 
-          payload: { 
-            user: result.user || null, 
+        dispatch({
+          type: "LOGIN_SUCCESS",
+          payload: {
+            user: result.user || null,
             token: result.token || null,
             loginResponse: result.fullResponse,
-          } 
+          },
         });
       } else {
-        dispatch({ 
-          type: 'LOGIN_FAILURE', 
-          payload: result.error || 'Login failed. Please try again.' 
+        dispatch({
+          type: "LOGIN_FAILURE",
+          payload: result.error || "Login failed. Please try again.",
         });
       }
     } catch (error) {
-      console.error('Login error in context:', error);
-      dispatch({ 
-        type: 'LOGIN_FAILURE', 
-        payload: 'Network error. Please check your connection and try again.' 
+      console.error("Login error in context:", error);
+      dispatch({
+        type: "LOGIN_FAILURE",
+        payload: "Network error. Please check your connection and try again.",
       });
     }
   };
@@ -164,16 +189,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     try {
       await diContainer.logoutUseCase.execute();
-      dispatch({ type: 'LOGOUT' });
+      dispatch({ type: "LOGOUT" });
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
       // Even if logout fails, clear local state
-      dispatch({ type: 'LOGOUT' });
+      dispatch({ type: "LOGOUT" });
     }
   };
 
   const clearError = () => {
-    dispatch({ type: 'CLEAR_ERROR' });
+    dispatch({ type: "CLEAR_ERROR" });
   };
 
   const getLoginResponse = () => {
@@ -198,7 +223,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

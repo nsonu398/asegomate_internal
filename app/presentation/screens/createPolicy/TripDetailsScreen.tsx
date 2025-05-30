@@ -1,9 +1,10 @@
 // app/presentation/screens/createPolicy/TripDetailsScreen.tsx
 import { Button } from '@/app/presentation/components/ui/Button';
 import { useTheme } from '@/app/presentation/contexts/ThemeContext';
+import { useTripDetails } from '@/app/presentation/contexts/TripDetailsContext';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   Platform,
   ScrollView,
@@ -14,60 +15,70 @@ import {
   View,
 } from 'react-native';
 
-interface TripDetailsScreenProps {
-  selectedDestination?: string;
-  onDestinationChange?: (destination: string) => void;
-}
+const tripTypes = ['Single Trip', 'Multi Trip', 'Student', 'Special'] as const;
 
-const tripTypes = ['Single Trip', 'Multi Trip', 'Student', 'Special'];
-
-export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
-  selectedDestination,
-  onDestinationChange,
-}) => {
+export const TripDetailsScreen: React.FC = () => {
   const router = useRouter();
   const params = useLocalSearchParams();
   const { theme, isDarkMode } = useTheme();
   
-  const [selectedTripType, setSelectedTripType] = useState('Single Trip');
-  const [tripDays, setTripDays] = useState(1);
-  const [tripDuration, setTripDuration] = useState<'180' | '365'>('180');
-  const [startDate, setStartDate] = useState<string>('');
-  const [endDate, setEndDate] = useState<string>('');
-  const [numberOfTravellers, setNumberOfTravellers] = useState<number>(1);
+  // Use the TripDetails context
+  const {
+    tripDetails,
+    validationErrors,
+    isLoading,
+    error,
+    canProceed,
+    
+    // Actions
+    setTripType,
+    setDestination,
+    setTripDuration,
+    setStartDate,
+    setEndDate,
+    setTripDays,
+    setNumberOfTravellers,
+    
+    // Utilities
+    validateForm,
+    getTripSummary,
+    isMinimumRequirementsMet,
+    setError,
+    clearError,
+  } = useTripDetails();
 
   // Handle date selection from calendar screen
   useEffect(() => {
     if (params.selectedStartDate) {
       setStartDate(params.selectedStartDate as string);
-      // Clear the parameter to avoid issues on re-render
       router.setParams({ selectedStartDate: undefined });
     }
     if (params.selectedEndDate) {
       setEndDate(params.selectedEndDate as string);
-      // Clear the parameter to avoid issues on re-render
       router.setParams({ selectedEndDate: undefined });
     }
-  }, [params.selectedStartDate, params.selectedEndDate]);
+  }, [params.selectedStartDate, params.selectedEndDate, setStartDate, setEndDate, router]);
 
-  // Auto-calculate trip days when both dates are selected
+  // Handle destination selection
   useEffect(() => {
-    if (startDate && endDate) {
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-      const diffTime = Math.abs(end.getTime() - start.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      setTripDays(diffDays);
+    if (params.selectedDestination) {
+      const destinationName = params.selectedDestination as string;
+      setDestination({
+        id: destinationName.toLowerCase(),
+        name: destinationName,
+        country: destinationName, // You might want to improve this
+      });
+      router.setParams({ selectedDestination: undefined });
     }
-  }, [startDate, endDate]);
+  }, [params.selectedDestination, setDestination, router]);
 
-  const incrementDays = () => setTripDays(prev => prev + 1);
-  const decrementDays = () => setTripDays(prev => Math.max(1, prev - 1));
+  const incrementDays = () => setTripDays(tripDetails.tripDays + 1);
+  const decrementDays = () => setTripDays(Math.max(1, tripDetails.tripDays - 1));
 
   const handleDestinationPress = () => {
     router.push({
       pathname: '/(createPolicy)/search-destination',
-      params: { selectedDestination }
+      params: { selectedDestination: tripDetails.destination?.name || '' }
     });
   };
 
@@ -76,7 +87,7 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
       pathname: '/(createPolicy)/calendar',
       params: { 
         dateType: 'start',
-        selectedDate: startDate
+        selectedDate: tripDetails.startDate
       }
     });
   };
@@ -86,27 +97,37 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
       pathname: '/(createPolicy)/calendar',
       params: { 
         dateType: 'end',
-        selectedDate: endDate,
-        startDate: startDate // Pass start date for validation
+        selectedDate: tripDetails.endDate,
+        startDate: tripDetails.startDate
       }
     });
   };
 
   const handleGetQuote = () => {
-    // Navigate to traveller selection screen with number of travellers
+    // Clear any previous errors
+    clearError();
+    
+    // Validate form before proceeding
+    const isValid = validateForm();
+    
+    if (!isValid) {
+      setError('Please fill in all required fields');
+      return;
+    }
+
+    // Navigate to traveller selection screen
     router.push({
       pathname: '/(createPolicy)/traveller-selection',
       params: { 
-        numberOfTravellers: numberOfTravellers.toString()
+        numberOfTravellers: tripDetails.numberOfTravellers.toString()
       }
     });
   };
 
   const handleTravellersPress = () => {
-    // For now, we'll use a simple prompt or modal to select number
-    // In a real app, you might want a dedicated picker screen
-    // For demonstration, let's cycle through 1-5 travellers
-    setNumberOfTravellers(prev => prev < 5 ? prev + 1 : 1);
+    // Cycle through 1-5 travellers for demonstration
+    const newCount = tripDetails.numberOfTravellers < 5 ? tripDetails.numberOfTravellers + 1 : 1;
+    setNumberOfTravellers(newCount);
   };
 
   const handleBack = () => {
@@ -143,6 +164,15 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
         <View style={styles.placeholder} />
       </View>
 
+      {/* Error Display */}
+      {error && (
+        <View style={[styles.errorContainer, { backgroundColor: theme.colors.feedback.error + '20' }]}>
+          <Text style={[styles.errorText, { color: theme.colors.feedback.error }]}>
+            {error}
+          </Text>
+        </View>
+      )}
+
       <ScrollView 
         style={styles.content}
         showsVerticalScrollIndicator={false}
@@ -156,7 +186,7 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
             contentContainerStyle={styles.tripTypeScroll}
           >
             {tripTypes.map((type) => {
-              const isSelected = selectedTripType === type;
+              const isSelected = tripDetails.tripType === type;
               return (
                 <TouchableOpacity
                   key={type}
@@ -171,7 +201,7 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
                         : theme.colors.neutral.gray300,
                     }
                   ]}
-                  onPress={() => setSelectedTripType(type)}
+                  onPress={() => setTripType(type)}
                 >
                   <Text
                     style={[
@@ -224,7 +254,9 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
               styles.selectButton,
               {
                 backgroundColor: theme.colors.neutral.gray100,
-                borderColor: theme.colors.neutral.gray300,
+                borderColor: validationErrors.destination 
+                  ? theme.colors.feedback.error 
+                  : theme.colors.neutral.gray300,
               }
             ]} 
             onPress={handleDestinationPress}
@@ -239,17 +271,22 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
               <Text style={[
                 styles.selectButtonText,
                 {
-                  color: selectedDestination 
+                  color: tripDetails.destination 
                     ? theme.colors.neutral.gray900 
                     : theme.colors.neutral.gray500,
-                  fontWeight: selectedDestination ? '500' : '400'
+                  fontWeight: tripDetails.destination ? '500' : '400'
                 }
               ]}>
-                {selectedDestination || 'Choose a Destination'}
+                {tripDetails.destination?.name || 'Choose a Destination'}
               </Text>
             </View>
             <Ionicons name="chevron-down" size={24} color={theme.colors.neutral.gray500} />
           </TouchableOpacity>
+          {validationErrors.destination && (
+            <Text style={[styles.validationError, { color: theme.colors.feedback.error }]}>
+              {validationErrors.destination}
+            </Text>
+          )}
         </View>
 
         {/* Trip Duration Options */}
@@ -261,12 +298,12 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
             <View style={[
               styles.radioOuter, 
               { 
-                borderColor: tripDuration === '180' 
+                borderColor: tripDetails.tripDuration === '180' 
                   ? theme.colors.primary.main 
                   : theme.colors.neutral.gray300 
               }
             ]}>
-              {tripDuration === '180' && (
+              {tripDetails.tripDuration === '180' && (
                 <View style={[styles.radioInner, { backgroundColor: theme.colors.primary.main }]} />
               )}
             </View>
@@ -282,12 +319,12 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
             <View style={[
               styles.radioOuter, 
               { 
-                borderColor: tripDuration === '365' 
+                borderColor: tripDetails.tripDuration === '365' 
                   ? theme.colors.primary.main 
                   : theme.colors.neutral.gray300 
               }
             ]}>
-              {tripDuration === '365' && (
+              {tripDetails.tripDuration === '365' && (
                 <View style={[styles.radioInner, { backgroundColor: theme.colors.primary.main }]} />
               )}
             </View>
@@ -306,7 +343,9 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
                 styles.dateButton,
                 {
                   backgroundColor: theme.colors.neutral.gray100,
-                  borderColor: theme.colors.neutral.gray300,
+                  borderColor: validationErrors.startDate 
+                    ? theme.colors.feedback.error 
+                    : theme.colors.neutral.gray300,
                 }
               ]} 
               onPress={handleStartDatePress}
@@ -320,15 +359,20 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
               <Text style={[
                 styles.dateButtonText,
                 {
-                  color: startDate 
+                  color: tripDetails.startDate 
                     ? theme.colors.neutral.gray900 
                     : theme.colors.neutral.gray500,
-                  fontWeight: startDate ? '500' : '400'
+                  fontWeight: tripDetails.startDate ? '500' : '400'
                 }
               ]}>
-                {startDate ? formatDateForDisplay(startDate) : 'Start Date'}
+                {tripDetails.startDate ? formatDateForDisplay(tripDetails.startDate) : 'Start Date'}
               </Text>
             </TouchableOpacity>
+            {validationErrors.startDate && (
+              <Text style={[styles.validationError, { color: theme.colors.feedback.error }]}>
+                {validationErrors.startDate}
+              </Text>
+            )}
           </View>
 
           <View style={styles.dateSection}>
@@ -338,12 +382,14 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
                 styles.dateButton,
                 {
                   backgroundColor: theme.colors.neutral.gray100,
-                  borderColor: theme.colors.neutral.gray300,
-                  opacity: !startDate ? 0.5 : 1,
+                  borderColor: validationErrors.endDate 
+                    ? theme.colors.feedback.error 
+                    : theme.colors.neutral.gray300,
+                  opacity: !tripDetails.startDate ? 0.5 : 1,
                 }
               ]} 
               onPress={handleEndDatePress}
-              disabled={!startDate}
+              disabled={!tripDetails.startDate}
             >
               <Ionicons 
                 name="calendar-outline" 
@@ -354,15 +400,20 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
               <Text style={[
                 styles.dateButtonText,
                 {
-                  color: endDate 
+                  color: tripDetails.endDate 
                     ? theme.colors.neutral.gray900 
                     : theme.colors.neutral.gray500,
-                  fontWeight: endDate ? '500' : '400'
+                  fontWeight: tripDetails.endDate ? '500' : '400'
                 }
               ]}>
-                {endDate ? formatDateForDisplay(endDate) : 'End Date'}
+                {tripDetails.endDate ? formatDateForDisplay(tripDetails.endDate) : 'End Date'}
               </Text>
             </TouchableOpacity>
+            {validationErrors.endDate && (
+              <Text style={[styles.validationError, { color: theme.colors.feedback.error }]}>
+                {validationErrors.endDate}
+              </Text>
+            )}
           </View>
         </View>
 
@@ -386,7 +437,7 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
                 style={styles.icon} 
               />
               <Text style={[styles.counterText, { color: theme.colors.neutral.gray900 }]}>
-                {tripDays}
+                {tripDetails.tripDays}
               </Text>
             </View>
             <View style={styles.counterButtons}>
@@ -432,7 +483,9 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
               styles.selectButton,
               {
                 backgroundColor: theme.colors.neutral.gray100,
-                borderColor: theme.colors.neutral.gray300,
+                borderColor: validationErrors.numberOfTravellers 
+                  ? theme.colors.feedback.error 
+                  : theme.colors.neutral.gray300,
               }
             ]} 
             onPress={handleTravellersPress}
@@ -447,34 +500,62 @@ export const TripDetailsScreen: React.FC<TripDetailsScreenProps> = ({
               <Text style={[
                 styles.selectButtonText,
                 {
-                  color: numberOfTravellers > 1 
+                  color: tripDetails.numberOfTravellers > 0 
                     ? theme.colors.neutral.gray900 
                     : theme.colors.neutral.gray500,
-                  fontWeight: numberOfTravellers > 1 ? '500' : '400'
+                  fontWeight: tripDetails.numberOfTravellers > 0 ? '500' : '400'
                 }
               ]}>
-                {numberOfTravellers > 1 ? `${numberOfTravellers} Travellers` : 'Choose No. of Travellers'}
+                {tripDetails.numberOfTravellers > 0 
+                  ? `${tripDetails.numberOfTravellers} Traveller${tripDetails.numberOfTravellers > 1 ? 's' : ''}` 
+                  : 'Choose No. of Travellers'}
               </Text>
             </View>
             <Ionicons name="chevron-down" size={24} color={theme.colors.neutral.gray500} />
           </TouchableOpacity>
+          {validationErrors.numberOfTravellers && (
+            <Text style={[styles.validationError, { color: theme.colors.feedback.error }]}>
+              {validationErrors.numberOfTravellers}
+            </Text>
+          )}
         </View>
+
+        {/* Trip Summary (if minimum requirements are met) */}
+        {isMinimumRequirementsMet() && (
+          <View style={[styles.summaryContainer, { backgroundColor: theme.colors.primary.main + '10' }]}>
+            <Text style={[styles.summaryTitle, { color: theme.colors.primary.main }]}>
+              Trip Summary
+            </Text>
+            <Text style={[styles.summaryText, { color: theme.colors.neutral.gray900 }]}>
+              {getTripSummary()}
+            </Text>
+          </View>
+        )}
       </ScrollView>
 
       {/* Get Quote Button */}
       <View style={[
         styles.buttonContainer,
         {
-          backgroundColor: theme.colors.neutral.gray100,
+          backgroundColor: theme.colors.neutral.background,
           borderTopColor: theme.colors.neutral.gray200,
         }
       ]}>
         <Button
           title="Get Quote"
           onPress={handleGetQuote}
+          loading={isLoading}
+          disabled={isLoading || !isMinimumRequirementsMet()}
           fullWidth
           size="large"
-          style={[styles.getQuoteButton, { backgroundColor: theme.colors.primary.main }]}
+          style={[
+            styles.getQuoteButton, 
+            { 
+              backgroundColor: isMinimumRequirementsMet() 
+                ? theme.colors.primary.main 
+                : theme.colors.neutral.gray400 
+            }
+          ]}
         />
       </View>
     </View>
@@ -506,6 +587,17 @@ const styles = StyleSheet.create({
   placeholder: {
     width: 40,
     height: 40,
+  },
+  errorContainer: {
+    marginHorizontal: 16,
+    marginBottom: 16,
+    padding: 12,
+    borderRadius: 8,
+  },
+  errorText: {
+    fontSize: 14,
+    textAlign: 'center',
+    fontWeight: '500',
   },
   content: {
     flex: 1,
@@ -557,6 +649,11 @@ const styles = StyleSheet.create({
   },
   selectButtonText: {
     fontSize: 16,
+  },
+  validationError: {
+    fontSize: 12,
+    marginTop: 4,
+    fontWeight: '500',
   },
   durationContainer: {
     flexDirection: 'row',
@@ -632,6 +729,22 @@ const styles = StyleSheet.create({
   },
   counterButtonText: {
     fontSize: 20,
+  },
+  summaryContainer: {
+    padding: 16,
+    borderRadius: 12,
+    marginTop: 8,
+    marginBottom: 16,
+  },
+  summaryTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 8,
+    letterSpacing: 0.5,
+  },
+  summaryText: {
+    fontSize: 16,
+    fontWeight: '500',
   },
   buttonContainer: {
     position: 'absolute',

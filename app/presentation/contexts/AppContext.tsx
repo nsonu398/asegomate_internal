@@ -1,11 +1,16 @@
 // src/presentation/contexts/AppContext.tsx
-import React, { createContext, ReactNode, useContext } from 'react';
+import React, { createContext, ReactNode, useContext, useState } from 'react';
 import { AuthProvider } from './AuthContext';
+import { MasterDataProvider } from './MasterDataContext';
 import { ThemeProvider } from './ThemeContext';
 
 // Interface for the context type
 interface AppContextType {
-  // Add global app state or methods here if needed
+  isLoading: boolean;
+  error: string | null;
+  setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
+  clearError: () => void;
 }
 
 // Create the context
@@ -16,12 +21,35 @@ interface AppProviderProps {
 }
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const setLoading = (loading: boolean) => {
+    setIsLoading(loading);
+  };
+
+  const clearError = () => {
+    setError(null);
+  };
+
+  const contextValue: AppContextType = {
+    isLoading,
+    error,
+    setLoading,
+    setError,
+    clearError,
+  };
+
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        {children}
-      </AuthProvider>
-    </ThemeProvider>
+    <AppContext.Provider value={contextValue}>
+      <ThemeProvider>
+        <AuthProvider>
+          <MasterDataProvider>
+            {children}
+          </MasterDataProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </AppContext.Provider>
   );
 };
 

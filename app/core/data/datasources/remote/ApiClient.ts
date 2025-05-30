@@ -24,10 +24,14 @@ interface ApiError {
   details?: any;
 }
 
+// Callback function type for handling 401 errors
+type UnauthorizedCallback = () => void;
+
 export class ApiClient {
   private static instance: ApiClient;
   private baseUrl: string;
   private timeout: number;
+  private unauthorizedCallback: UnauthorizedCallback | null = null;
 
   private constructor() {
     this.baseUrl = API_BASE_URL;
@@ -41,9 +45,14 @@ export class ApiClient {
     return ApiClient.instance;
   }
 
+  // Method to set the callback for handling 401 errors
+  public setUnauthorizedCallback(callback: UnauthorizedCallback): void {
+    this.unauthorizedCallback = callback;
+  }
+
   private async getAuthToken(): Promise<string | null> {
     try {
-      return await AsyncStorage.getItem('userToken');
+      return await AsyncStorage.getItem('auth_token');
     } catch (error) {
       console.error('Error retrieving auth token:', error);
       return null;
@@ -61,7 +70,7 @@ export class ApiClient {
     if (requiresAuth) {
       const token = await this.getAuthToken();
       if (token) {
-        headers.append('Authorization', `Bearer ${token}`);
+        headers.append('Authorization', `Bearer ${token.replace('"','')}`);
       }
     }
 
@@ -74,6 +83,17 @@ export class ApiClient {
         reject(new Error('Request timeout'));
       }, timeout);
     });
+  }
+
+  private async handle401Error(): Promise<void> {
+    try {
+      // Just call the unauthorized callback - let AuthContext handle cleanup
+      if (this.unauthorizedCallback) {
+        this.unauthorizedCallback();
+      }
+    } catch (error) {
+      console.error('Error handling 401 unauthorized:', error);
+    }
   }
 
   private handleApiError(error: any, statusCode: number): ApiError {
@@ -132,6 +152,16 @@ export class ApiClient {
       const response = await Promise.race([fetchPromise, timeoutPromise]);
       const statusCode = response.status;
       const success = statusCode >= 200 && statusCode < 300;
+
+      // Handle 401 Unauthorized error
+      if (statusCode === 401) {
+        await this.handle401Error();
+        return {
+          error: 'Session expired. Please login again.',
+          status: statusCode,
+          success: false,
+        };
+      }
 
       if (success) {
         const contentType = response.headers.get('content-type');

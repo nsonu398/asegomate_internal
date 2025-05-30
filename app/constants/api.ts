@@ -14,28 +14,10 @@ export const API_ENDPOINTS = {
     PROFILE: '/users/profile',
     UPDATE_PROFILE: '/users/profile',
   },
-  TRIPS: {
-    LIST: '/trips',
-    DETAIL: (id: string) => `/trips/${id}`,
-    CREATE: '/trips',
-    UPDATE: (id: string) => `/trips/${id}`,
-    DELETE: (id: string) => `/trips/${id}`,
+  MASTER_SELECT: {
+    GEOGRAPHICAL_AREAS: '/asego/api/v1/masterSelect/GEOGRAPHICAL_AREA',
   },
-  POLICIES: {
-    LIST: '/policies',
-    DETAIL: (id: string) => `/policies/${id}`,
-    CREATE: '/policies',
-    UPDATE: (id: string) => `/policies/${id}`,
-    CANCEL: (id: string) => `/policies/${id}/cancel`,
-    AVAILABLE_COVERAGE: '/coverage/available',
-    CALCULATE_PREMIUM: '/policies/calculate-premium',
-  },
-  CLAIMS: {
-    LIST: '/claims',
-    DETAIL: (id: string) => `/claims/${id}`,
-    CREATE: '/claims',
-    UPDATE: (id: string) => `/claims/${id}`,
-    UPLOAD_DOCUMENT: (id: string) => `/claims/${id}/documents`,
-    DELETE_DOCUMENT: (id: string, documentId: string) => `/claims/${id}/documents/${documentId}`,
+  COUNTRIES: {
+    LIST: 'asego/api/v1/country',
   },
 };

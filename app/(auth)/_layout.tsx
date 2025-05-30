@@ -36,6 +36,9 @@ export default function AuthLayout() {
       // Redirect to app if already authenticated
       router.replace("/home");
     }
+    if(!isLoading && !isAuthenticated){
+      router.replace("/(auth)/login")
+    }
   }, [isAuthenticated, isLoading, router]);
 
   if (isLoading) {

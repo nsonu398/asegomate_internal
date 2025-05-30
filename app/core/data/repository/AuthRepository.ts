@@ -1,7 +1,6 @@
 // app/core/data/repository/AuthRepository.ts
 import { API_ENDPOINTS, CLIENT_TYPE } from '@/app/constants/api';
 import { AuthResult, IAuthRepository, LoginCredentials } from '@/app/core/domain/repositories/IAuthRepository';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import localStorage from '../datasources/local/LocalStorage';
 import apiClient from '../datasources/remote/ApiClient';
 
@@ -78,10 +77,6 @@ export class AuthRepository implements IAuthRepository {
         localStorage.removeItem('auth_token'),
         localStorage.removeItem('auth_user'),
         localStorage.removeItem('auth_full_response'),
-        // Also clear AsyncStorage for backward compatibility
-        AsyncStorage.removeItem('userToken'),
-        AsyncStorage.removeItem('userData'),
-        AsyncStorage.removeItem('loginResponse'),
       ]);
       return true;
     } catch (error) {
