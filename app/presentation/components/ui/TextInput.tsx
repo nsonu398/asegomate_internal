@@ -1,5 +1,5 @@
-// src/presentation/components/ui/TextInput.tsx
-import { theme } from '@/app/theme';
+// app/presentation/components/ui/TextInput.tsx
+import { useTheme } from '@/app/presentation/contexts/ThemeContext';
 import React, { useState } from 'react';
 import {
   TextInput as RNTextInput,
@@ -30,24 +30,34 @@ export const TextInput: React.FC<TextInputProps> = ({
   ...rest
 }) => {
   const [isFocused, setIsFocused] = useState(false);
+  const { theme } = useTheme();
 
   return (
     <View style={[styles.container, fullWidth && styles.fullWidth]}>
       {label && (
-        <Text style={styles.label}>{label}</Text>
+        <Text style={[styles.label, { color: theme.colors.neutral.gray900 }]}>
+          {label}
+        </Text>
       )}
       <View
         style={[
           styles.inputContainer,
-          isFocused && styles.focusedInput,
-          error && styles.errorInput,
+          {
+            backgroundColor: theme.colors.neutral.gray100,
+            borderColor: error 
+              ? theme.colors.feedback.error
+              : isFocused 
+              ? theme.colors.primary.main 
+              : theme.colors.neutral.gray300,
+            borderWidth: isFocused ? 1.1 : 0.8,
+          }
         ]}
       >
         {startIcon && (
           <View style={styles.startIcon}>{startIcon}</View>
         )}
         <RNTextInput
-          style={[styles.input, style]}
+          style={[styles.input, { color: theme.colors.neutral.gray900 }, style]}
           placeholderTextColor={theme.colors.neutral.gray400}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
@@ -64,7 +74,9 @@ export const TextInput: React.FC<TextInputProps> = ({
         )}
       </View>
       {error && (
-        <Text style={styles.errorText}>{error}</Text>
+        <Text style={[styles.errorText, { color: theme.colors.feedback.error }]}>
+          {error}
+        </Text>
       )}
     </View>
   );
@@ -72,47 +84,36 @@ export const TextInput: React.FC<TextInputProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: theme.spacing.md,
+    marginBottom: 16,
   },
   fullWidth: {
     width: '100%',
   },
   label: {
-    fontSize: theme.typography.fontSize.sm,
-    color: theme.colors.neutral.gray700,
-    marginBottom: theme.spacing.xs,
+    fontSize: 14,
+    fontWeight: '500',
+    marginBottom: 8,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: theme.colors.neutral.gray300,
     borderRadius: 8,
-    backgroundColor: theme.colors.neutral.white,
-    paddingHorizontal: theme.spacing.md,
+    paddingHorizontal: 16,
     minHeight: 48,
   },
   input: {
     flex: 1,
-    paddingVertical: theme.spacing.sm,
-    fontSize: theme.typography.fontSize.md,
-    color: theme.colors.neutral.gray800,
-  },
-  focusedInput: {
-    borderColor: theme.colors.primary.main,
-  },
-  errorInput: {
-    borderColor: theme.colors.feedback.error,
+    paddingVertical: 8,
+    fontSize: 16,
   },
   errorText: {
-    fontSize: theme.typography.fontSize.xs,
-    color: theme.colors.feedback.error,
-    marginTop: theme.spacing.xs,
+    fontSize: 12,
+    marginTop: 4,
   },
   startIcon: {
-    marginRight: theme.spacing.xs,
+    marginRight: 8,
   },
   endIcon: {
-    marginLeft: theme.spacing.xs,
+    marginLeft: 8,
   },
 });

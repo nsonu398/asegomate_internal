@@ -149,10 +149,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     });
   }, []);
 
-  useEffect(() => {
-    console.log("Auth state changed:", state);
-  }, [state]);
-
   const login = async (email: string, password: string) => {
     dispatch({ type: "LOGIN_START" });
 

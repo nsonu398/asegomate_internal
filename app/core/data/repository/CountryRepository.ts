@@ -1,7 +1,7 @@
 import { API_ENDPOINTS } from "@/app/constants/api";
 import {
-    CountryResponse,
-    ICountriesRepository,
+  CountryResponse,
+  ICountriesRepository,
 } from "../../domain/repositories/ICountriesRepository";
 import ApiClient from "../datasources/remote/ApiClient";
 
@@ -24,8 +24,8 @@ export class CountryRepository implements ICountriesRepository {
         true
       );
       return {
-        countries: [],
-        success: false,
+        countries: response.data,
+        success: response.success,
         error: "Not implemented",
         message: "This method is not implemented yet.",
         statusCode: 501,

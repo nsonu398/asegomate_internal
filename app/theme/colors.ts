@@ -28,6 +28,7 @@ export const colors = {
       gray800: '#1E293B',
       gray900: '#0F172A',
       black: '#000000',
+      sOrange:"#FEEEE7"
     },
     // Feedback colors
     feedback: {

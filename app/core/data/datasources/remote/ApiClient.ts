@@ -70,7 +70,7 @@ export class ApiClient {
     if (requiresAuth) {
       const token = await this.getAuthToken();
       if (token) {
-        headers.append('Authorization', `Bearer ${token.replace('"','')}`);
+        headers.append('Authorization', `Bearer ${token.replaceAll('"','')}`);
       }
     }
 

@@ -2,53 +2,22 @@
 import { Button } from "@/app/presentation/components/ui/Button";
 import { TextInput } from "@/app/presentation/components/ui/TextInput";
 import { useTheme } from "@/app/presentation/contexts/ThemeContext";
-import { useForm } from "@/app/presentation/hooks/useForm";
+import { useTravellerDetails } from "@/app/presentation/contexts/TravellerDetailsContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState } from "react";
+import React from "react";
 import {
-    Alert,
-    Platform,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-
-interface TravellerDetailsFormValues {
-  // Personal Details
-  passportNumber: string;
-  fullName: string;
-  gender: "Male" | "Female" | "Other" | "";
-  dateOfBirth: string;
-  addressLine1: string;
-  addressLine2: string;
-  pincode: string;
-  city: string;
-  district: string;
-  state: string;
-  country: string;
-  emailAddress: string;
-  mobileNumber: string;
-
-  // Nominee Details
-  nomineeName: string;
-  relationshipWithNominee: string;
-
-  // Emergency Contact Details
-  emergencyContactName: string;
-  emergencyMobileNumber: string;
-  emergencyEmailAddress: string;
-
-  // Optional Details
-  remark: string;
-  crReferenceNumber: string;
-  pastIllness: string;
-  gstNumber: string;
-  gstState: string;
-}
+import { Dropdown } from "../../components/ui/Dropdown";
+import { useApp } from "../../contexts/AppContext";
 
 interface CollapsibleSectionProps {
   title: string;
@@ -72,7 +41,7 @@ const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
       style={[
         styles.section,
         {
-          backgroundColor: theme.colors.neutral.white,
+          backgroundColor: theme.colors.neutral.gray100,
           borderColor: theme.colors.neutral.gray200,
         },
       ]}
@@ -158,127 +127,33 @@ export const TravellerDetailsScreen: React.FC = () => {
   const { theme, isDarkMode } = useTheme();
   const router = useRouter();
   const params = useLocalSearchParams();
+  const { setCalendarCallback } = useApp();
+
+  const {
+    formValues,
+    validationErrors,
+    isLoading,
+    error,
+    expandedSections,
+    updateField,
+    toggleSection,
+    setLoading,
+    setError,
+    validateForm,
+  } = useTravellerDetails();
 
   const travellerId = params.travellerId as string;
   const travellerNumber = travellerId?.replace("traveller_", "") || "1";
 
-  // Section expansion states
-  const [expandedSections, setExpandedSections] = useState({
-    personal: true,
-    nominee: false,
-    emergency: false,
-    optional: false,
-  });
-
-  // Dropdown states
-  const [showRelationshipDropdown, setShowRelationshipDropdown] =
-    useState(false);
-  const [showStateDropdown, setShowStateDropdown] = useState(false);
-  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
-  const [showGstStateDropdown, setShowGstStateDropdown] = useState(false);
-
-  const validateRequired = (value: string) => {
-    if (!value.trim()) return "This field is required";
-    return undefined;
-  };
-
-  const validateEmail = (email: string) => {
-    if (!email.trim()) return "Email is required";
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) return "Please enter a valid email";
-    return undefined;
-  };
-
-  const validateMobile = (mobile: string) => {
-    if (!mobile.trim()) return "Mobile number is required";
-    if (mobile.length < 10) return "Please enter a valid mobile number";
-    return undefined;
-  };
-
-  const {
-    values,
-    errors,
-    touched,
-    isSubmitting,
-    handleChange,
-    handleBlur,
-    handleSubmit,
-  } = useForm<TravellerDetailsFormValues>({
-    initialValues: {
-      passportNumber: "",
-      fullName: "",
-      gender: "",
-      dateOfBirth: "",
-      addressLine1: "",
-      addressLine2: "",
-      pincode: "",
-      city: "",
-      district: "",
-      state: "",
-      country: "",
-      emailAddress: "",
-      mobileNumber: "",
-      nomineeName: "",
-      relationshipWithNominee: "",
-      emergencyContactName: "",
-      emergencyMobileNumber: "",
-      emergencyEmailAddress: "",
-      remark: "",
-      crReferenceNumber: "",
-      pastIllness: "",
-      gstNumber: "",
-      gstState: "",
-    },
-    validations: {
-      passportNumber: validateRequired,
-      fullName: validateRequired,
-      gender: validateRequired,
-      dateOfBirth: validateRequired,
-      addressLine1: validateRequired,
-      pincode: validateRequired,
-      city: validateRequired,
-      district: validateRequired,
-      state: validateRequired,
-      country: validateRequired,
-      emailAddress: validateEmail,
-      mobileNumber: validateMobile,
-      nomineeName: validateRequired,
-      relationshipWithNominee: validateRequired,
-      emergencyContactName: validateRequired,
-      emergencyMobileNumber: validateMobile,
-      emergencyEmailAddress: validateEmail,
-    },
-    onSubmit: async (formValues) => {
-      try {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        // Navigate to policy selection screen
-        router.push({
-          pathname: "/(createPolicy)/select-policy",
-          params: {
-            travellerNumber: travellerNumber,
-          },
-        });
-      } catch (error) {
-        Alert.alert("Error", "Failed to save details. Please try again.");
-      }
-    },
-  });
-
-  const toggleSection = (section: keyof typeof expandedSections) => {
-    setExpandedSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
-  };
-
   const handleDatePress = () => {
+    setCalendarCallback((selectedDate: string) => {
+      updateField("dateOfBirth", selectedDate);
+    });
     router.push({
       pathname: "/(createPolicy)/calendar",
       params: {
         dateType: "birth",
-        selectedDate: values.dateOfBirth,
+        selectedDate: formValues.dateOfBirth,
       },
     });
   };
@@ -287,61 +162,32 @@ export const TravellerDetailsScreen: React.FC = () => {
     router.back();
   };
 
-  const renderDropdown = (
-    options: string[],
-    selectedValue: string,
-    onSelect: (value: string) => void,
-    isVisible: boolean,
-    onClose: () => void
-  ) => {
-    if (!isVisible) return null;
+  const handleSubmit = async () => {
+    if (!validateForm()) {
+      setError("Please fill in all required fields correctly");
+      return;
+    }
 
-    return (
-      <View
-        style={[
-          styles.dropdown,
-          {
-            backgroundColor: theme.colors.neutral.white,
-            borderColor: theme.colors.neutral.gray200,
-          },
-        ]}
-      >
-        <ScrollView style={styles.dropdownScroll} nestedScrollEnabled>
-          {options.map((option, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                styles.dropdownItem,
-                {
-                  backgroundColor:
-                    selectedValue === option
-                      ? theme.colors.primary.main + "20"
-                      : "transparent",
-                },
-              ]}
-              onPress={() => {
-                onSelect(option);
-                onClose();
-              }}
-            >
-              <Text
-                style={[
-                  styles.dropdownItemText,
-                  {
-                    color:
-                      selectedValue === option
-                        ? theme.colors.primary.main
-                        : theme.colors.neutral.gray900,
-                  },
-                ]}
-              >
-                {option}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
-    );
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Navigate to policy selection screen
+      router.push({
+        pathname: "/(createPolicy)/select-policy",
+        params: {
+          travellerNumber: travellerNumber,
+        },
+      });
+    } catch (error) {
+      setError("Failed to save details. Please try again.");
+      Alert.alert("Error", "Failed to save details. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -377,6 +223,22 @@ export const TravellerDetailsScreen: React.FC = () => {
         </Text>
         <View style={styles.placeholder} />
       </View>
+
+      {/* Error Display */}
+      {error && (
+        <View
+          style={[
+            styles.errorContainer,
+            { backgroundColor: theme.colors.feedback.error + "20" },
+          ]}
+        >
+          <Text
+            style={[styles.errorText, { color: theme.colors.feedback.error }]}
+          >
+            {error}
+          </Text>
+        </View>
+      )}
 
       <ScrollView
         style={styles.content}
@@ -431,20 +293,18 @@ export const TravellerDetailsScreen: React.FC = () => {
 
           <TextInput
             label="Passport Number"
-            placeholder="eg. London"
-            value={values.passportNumber}
-            onChangeText={(text) => handleChange("passportNumber", text)}
-            onBlur={() => handleBlur("passportNumber")}
-            error={touched.passportNumber ? errors.passportNumber : undefined}
+            placeholder="eg. A1234567"
+            value={formValues.passportNumber}
+            onChangeText={(text) => updateField("passportNumber", text)}
+            error={validationErrors.passportNumber}
           />
 
           <TextInput
             label="Full Name"
-            placeholder="eg. London"
-            value={values.fullName}
-            onChangeText={(text) => handleChange("fullName", text)}
-            onBlur={() => handleBlur("fullName")}
-            error={touched.fullName ? errors.fullName : undefined}
+            placeholder="eg. John Doe"
+            value={formValues.fullName}
+            onChangeText={(text) => updateField("fullName", text)}
+            error={validationErrors.fullName}
           />
 
           {/* Gender Selection */}
@@ -462,23 +322,23 @@ export const TravellerDetailsScreen: React.FC = () => {
                     styles.genderButton,
                     {
                       backgroundColor:
-                        values.gender === gender
+                        formValues.gender === gender
                           ? theme.colors.primary.main + "20"
-                          : theme.colors.neutral.white,
+                          : theme.colors.neutral.gray100,
                       borderColor:
-                        values.gender === gender
+                        formValues.gender === gender
                           ? theme.colors.primary.main
                           : theme.colors.neutral.gray300,
                     },
                   ]}
-                  onPress={() => handleChange("gender", gender as any)}
+                  onPress={() => updateField("gender", gender as any)}
                 >
                   <Text
                     style={[
                       styles.genderButtonText,
                       {
                         color:
-                          values.gender === gender
+                          formValues.gender === gender
                             ? theme.colors.primary.main
                             : theme.colors.neutral.gray600,
                       },
@@ -489,14 +349,14 @@ export const TravellerDetailsScreen: React.FC = () => {
                 </TouchableOpacity>
               ))}
             </View>
-            {touched.gender && errors.gender && (
+            {validationErrors.gender && (
               <Text
                 style={[
                   styles.errorText,
                   { color: theme.colors.feedback.error },
                 ]}
               >
-                {errors.gender}
+                {validationErrors.gender}
               </Text>
             )}
           </View>
@@ -505,8 +365,10 @@ export const TravellerDetailsScreen: React.FC = () => {
             style={[
               styles.dateInput,
               {
-                borderColor: theme.colors.neutral.gray300,
-                backgroundColor: theme.colors.neutral.white,
+                borderColor: validationErrors.dateOfBirth
+                  ? theme.colors.feedback.error
+                  : theme.colors.neutral.gray300,
+                backgroundColor: theme.colors.neutral.gray100,
               },
             ]}
             onPress={handleDatePress}
@@ -521,13 +383,13 @@ export const TravellerDetailsScreen: React.FC = () => {
                 style={[
                   styles.dateInputText,
                   {
-                    color: values.dateOfBirth
+                    color: formValues.dateOfBirth
                       ? theme.colors.neutral.gray900
                       : theme.colors.neutral.gray400,
                   },
                 ]}
               >
-                {values.dateOfBirth || "eg. MM/DD/YYYY"}
+                {formValues.dateOfBirth || "eg. MM/DD/YYYY"}
               </Text>
               <Ionicons
                 name="calendar-outline"
@@ -536,179 +398,89 @@ export const TravellerDetailsScreen: React.FC = () => {
               />
             </View>
           </TouchableOpacity>
+          {validationErrors.dateOfBirth && (
+            <Text
+              style={[styles.errorText, { color: theme.colors.feedback.error }]}
+            >
+              {validationErrors.dateOfBirth}
+            </Text>
+          )}
 
           <TextInput
             label="Address Line 1"
-            placeholder="eg. London"
-            value={values.addressLine1}
-            onChangeText={(text) => handleChange("addressLine1", text)}
-            onBlur={() => handleBlur("addressLine1")}
-            error={touched.addressLine1 ? errors.addressLine1 : undefined}
+            placeholder="eg. 123 Main Street"
+            value={formValues.addressLine1}
+            onChangeText={(text) => updateField("addressLine1", text)}
+            error={validationErrors.addressLine1}
           />
 
           <TextInput
             label="Address Line 2"
-            placeholder="eg. London"
-            value={values.addressLine2}
-            onChangeText={(text) => handleChange("addressLine2", text)}
-            onBlur={() => handleBlur("addressLine2")}
-            error={touched.addressLine2 ? errors.addressLine2 : undefined}
+            placeholder="eg. Apartment 4B"
+            value={formValues.addressLine2}
+            onChangeText={(text) => updateField("addressLine2", text)}
+            error={validationErrors.addressLine2}
           />
 
           <TextInput
             label="Pincode"
-            placeholder="eg. London"
-            value={values.pincode}
-            onChangeText={(text) => handleChange("pincode", text)}
-            onBlur={() => handleBlur("pincode")}
-            error={touched.pincode ? errors.pincode : undefined}
+            placeholder="eg. 400001"
+            value={formValues.pincode}
+            onChangeText={(text) => updateField("pincode", text)}
+            error={validationErrors.pincode}
             keyboardType="numeric"
           />
 
           <TextInput
             label="City"
-            placeholder="eg. London"
-            value={values.city}
-            onChangeText={(text) => handleChange("city", text)}
-            onBlur={() => handleBlur("city")}
-            error={touched.city ? errors.city : undefined}
+            placeholder="eg. Mumbai"
+            value={formValues.city}
+            onChangeText={(text) => updateField("city", text)}
+            error={validationErrors.city}
           />
 
           <TextInput
             label="District"
-            placeholder="eg. London"
-            value={values.district}
-            onChangeText={(text) => handleChange("district", text)}
-            onBlur={() => handleBlur("district")}
-            error={touched.district ? errors.district : undefined}
+            placeholder="eg. Mumbai City"
+            value={formValues.district}
+            onChangeText={(text) => updateField("district", text)}
+            error={validationErrors.district}
           />
 
-          {/* State Dropdown */}
-          <View style={styles.inputGroup}>
-            <Text
-              style={[styles.label, { color: theme.colors.neutral.gray900 }]}
-            >
-              State
-            </Text>
-            <TouchableOpacity
-              style={[
-                styles.selectButton,
-                {
-                  borderColor: theme.colors.neutral.gray300,
-                  backgroundColor: theme.colors.neutral.white,
-                },
-              ]}
-              onPress={() => setShowStateDropdown(!showStateDropdown)}
-            >
-              <Text
-                style={[
-                  styles.selectButtonText,
-                  {
-                    color: values.state
-                      ? theme.colors.neutral.gray900
-                      : theme.colors.neutral.gray400,
-                  },
-                ]}
-              >
-                {values.state || "2"}
-              </Text>
-              <Ionicons
-                name="chevron-down"
-                size={20}
-                color={theme.colors.neutral.gray500}
-              />
-            </TouchableOpacity>
-            {renderDropdown(
-              stateOptions,
-              values.state,
-              (value) => handleChange("state", value),
-              showStateDropdown,
-              () => setShowStateDropdown(false)
-            )}
-            {touched.state && errors.state && (
-              <Text
-                style={[
-                  styles.errorText,
-                  { color: theme.colors.feedback.error },
-                ]}
-              >
-                {errors.state}
-              </Text>
-            )}
-          </View>
+          <Dropdown
+            label="State"
+            placeholder="Select State"
+            options={stateOptions}
+            value={formValues.state}
+            onSelect={(value) => updateField("state", value)}
+            error={validationErrors.state}
+          />
 
-          {/* Country Dropdown */}
-          <View style={styles.inputGroup}>
-            <Text
-              style={[styles.label, { color: theme.colors.neutral.gray900 }]}
-            >
-              Country
-            </Text>
-            <TouchableOpacity
-              style={[
-                styles.selectButton,
-                {
-                  borderColor: theme.colors.neutral.gray300,
-                  backgroundColor: theme.colors.neutral.white,
-                },
-              ]}
-              onPress={() => setShowCountryDropdown(!showCountryDropdown)}
-            >
-              <Text
-                style={[
-                  styles.selectButtonText,
-                  {
-                    color: values.country
-                      ? theme.colors.neutral.gray900
-                      : theme.colors.neutral.gray400,
-                  },
-                ]}
-              >
-                {values.country || "2"}
-              </Text>
-              <Ionicons
-                name="chevron-down"
-                size={20}
-                color={theme.colors.neutral.gray500}
-              />
-            </TouchableOpacity>
-            {renderDropdown(
-              countryOptions,
-              values.country,
-              (value) => handleChange("country", value),
-              showCountryDropdown,
-              () => setShowCountryDropdown(false)
-            )}
-            {touched.country && errors.country && (
-              <Text
-                style={[
-                  styles.errorText,
-                  { color: theme.colors.feedback.error },
-                ]}
-              >
-                {errors.country}
-              </Text>
-            )}
-          </View>
+          <Dropdown
+            label="Country"
+            placeholder="Select Country"
+            options={countryOptions}
+            value={formValues.country}
+            onSelect={(value) => updateField("country", value)}
+            error={validationErrors.country}
+          />
 
           <TextInput
             label="Email Address"
-            placeholder="eg. London"
-            value={values.emailAddress}
-            onChangeText={(text) => handleChange("emailAddress", text)}
-            onBlur={() => handleBlur("emailAddress")}
-            error={touched.emailAddress ? errors.emailAddress : undefined}
+            placeholder="eg. john@example.com"
+            value={formValues.emailAddress}
+            onChangeText={(text) => updateField("emailAddress", text)}
+            error={validationErrors.emailAddress}
             keyboardType="email-address"
             autoCapitalize="none"
           />
 
           <TextInput
             label="Mobile Number"
-            placeholder="eg. London"
-            value={values.mobileNumber}
-            onChangeText={(text) => handleChange("mobileNumber", text)}
-            onBlur={() => handleBlur("mobileNumber")}
-            error={touched.mobileNumber ? errors.mobileNumber : undefined}
+            placeholder="eg. 9876543210"
+            value={formValues.mobileNumber}
+            onChangeText={(text) => updateField("mobileNumber", text)}
+            error={validationErrors.mobileNumber}
             keyboardType="phone-pad"
           />
         </CollapsibleSection>
@@ -728,69 +500,20 @@ export const TravellerDetailsScreen: React.FC = () => {
         >
           <TextInput
             label="Nominee Name"
-            placeholder="eg. London"
-            value={values.nomineeName}
-            onChangeText={(text) => handleChange("nomineeName", text)}
-            onBlur={() => handleBlur("nomineeName")}
-            error={touched.nomineeName ? errors.nomineeName : undefined}
+            placeholder="eg. Jane Doe"
+            value={formValues.nomineeName}
+            onChangeText={(text) => updateField("nomineeName", text)}
+            error={validationErrors.nomineeName}
           />
 
-          {/* Relationship Dropdown */}
-          <View style={styles.inputGroup}>
-            <Text
-              style={[styles.label, { color: theme.colors.neutral.gray900 }]}
-            >
-              Relationship With Nominee
-            </Text>
-            <TouchableOpacity
-              style={[
-                styles.selectButton,
-                {
-                  borderColor: theme.colors.neutral.gray300,
-                  backgroundColor: theme.colors.neutral.white,
-                },
-              ]}
-              onPress={() =>
-                setShowRelationshipDropdown(!showRelationshipDropdown)
-              }
-            >
-              <Text
-                style={[
-                  styles.selectButtonText,
-                  {
-                    color: values.relationshipWithNominee
-                      ? theme.colors.neutral.gray900
-                      : theme.colors.neutral.gray400,
-                  },
-                ]}
-              >
-                {values.relationshipWithNominee || "2"}
-              </Text>
-              <Ionicons
-                name="chevron-down"
-                size={20}
-                color={theme.colors.neutral.gray500}
-              />
-            </TouchableOpacity>
-            {renderDropdown(
-              relationshipOptions,
-              values.relationshipWithNominee,
-              (value) => handleChange("relationshipWithNominee", value),
-              showRelationshipDropdown,
-              () => setShowRelationshipDropdown(false)
-            )}
-            {touched.relationshipWithNominee &&
-              errors.relationshipWithNominee && (
-                <Text
-                  style={[
-                    styles.errorText,
-                    { color: theme.colors.feedback.error },
-                  ]}
-                >
-                  {errors.relationshipWithNominee}
-                </Text>
-              )}
-          </View>
+          <Dropdown
+            label="Relationship With Nominee"
+            placeholder="Select Relationship"
+            options={relationshipOptions}
+            value={formValues.relationshipWithNominee}
+            onSelect={(value) => updateField("relationshipWithNominee", value)}
+            error={validationErrors.relationshipWithNominee}
+          />
         </CollapsibleSection>
 
         {/* Emergency Contact Details Section */}
@@ -804,42 +527,27 @@ export const TravellerDetailsScreen: React.FC = () => {
         >
           <TextInput
             label="Emergency Contact Person Name"
-            placeholder="eg. London"
-            value={values.emergencyContactName}
-            onChangeText={(text) => handleChange("emergencyContactName", text)}
-            onBlur={() => handleBlur("emergencyContactName")}
-            error={
-              touched.emergencyContactName
-                ? errors.emergencyContactName
-                : undefined
-            }
+            placeholder="eg. Emergency Contact"
+            value={formValues.emergencyContactName}
+            onChangeText={(text) => updateField("emergencyContactName", text)}
+            error={validationErrors.emergencyContactName}
           />
 
           <TextInput
             label="Mobile Number"
-            placeholder="eg. London"
-            value={values.emergencyMobileNumber}
-            onChangeText={(text) => handleChange("emergencyMobileNumber", text)}
-            onBlur={() => handleBlur("emergencyMobileNumber")}
-            error={
-              touched.emergencyMobileNumber
-                ? errors.emergencyMobileNumber
-                : undefined
-            }
+            placeholder="eg. 9876543210"
+            value={formValues.emergencyMobileNumber}
+            onChangeText={(text) => updateField("emergencyMobileNumber", text)}
+            error={validationErrors.emergencyMobileNumber}
             keyboardType="phone-pad"
           />
 
           <TextInput
             label="Email Address"
-            placeholder="eg. London"
-            value={values.emergencyEmailAddress}
-            onChangeText={(text) => handleChange("emergencyEmailAddress", text)}
-            onBlur={() => handleBlur("emergencyEmailAddress")}
-            error={
-              touched.emergencyEmailAddress
-                ? errors.emergencyEmailAddress
-                : undefined
-            }
+            placeholder="eg. emergency@example.com"
+            value={formValues.emergencyEmailAddress}
+            onChangeText={(text) => updateField("emergencyEmailAddress", text)}
+            error={validationErrors.emergencyEmailAddress}
             keyboardType="email-address"
             autoCapitalize="none"
           />
@@ -875,89 +583,47 @@ export const TravellerDetailsScreen: React.FC = () => {
         >
           <TextInput
             label="Remark"
-            placeholder="eg. London"
-            value={values.remark}
-            onChangeText={(text) => handleChange("remark", text)}
-            onBlur={() => handleBlur("remark")}
-            error={touched.remark ? errors.remark : undefined}
+            placeholder="Any additional remarks"
+            value={formValues.remark}
+            onChangeText={(text) => updateField("remark", text)}
+            error={validationErrors.remark}
             multiline
             numberOfLines={3}
           />
 
           <TextInput
             label="CR Reference Number"
-            placeholder="eg. London"
-            value={values.crReferenceNumber}
-            onChangeText={(text) => handleChange("crReferenceNumber", text)}
-            onBlur={() => handleBlur("crReferenceNumber")}
-            error={
-              touched.crReferenceNumber ? errors.crReferenceNumber : undefined
-            }
+            placeholder="eg. CR123456"
+            value={formValues.crReferenceNumber}
+            onChangeText={(text) => updateField("crReferenceNumber", text)}
+            error={validationErrors.crReferenceNumber}
           />
 
           <TextInput
             label="Past Illness"
-            placeholder="eg. London"
-            value={values.pastIllness}
-            onChangeText={(text) => handleChange("pastIllness", text)}
-            onBlur={() => handleBlur("pastIllness")}
-            error={touched.pastIllness ? errors.pastIllness : undefined}
+            placeholder="Any past medical conditions"
+            value={formValues.pastIllness}
+            onChangeText={(text) => updateField("pastIllness", text)}
+            error={validationErrors.pastIllness}
             multiline
             numberOfLines={3}
           />
 
           <TextInput
             label="GST Number"
-            placeholder="eg. London"
-            value={values.gstNumber}
-            onChangeText={(text) => handleChange("gstNumber", text)}
-            onBlur={() => handleBlur("gstNumber")}
-            error={touched.gstNumber ? errors.gstNumber : undefined}
+            placeholder="eg. 27AAAFG1234L1ZM"
+            value={formValues.gstNumber}
+            onChangeText={(text) => updateField("gstNumber", text)}
+            error={validationErrors.gstNumber}
           />
 
-          {/* GST State Dropdown */}
-          <View style={styles.inputGroup}>
-            <Text
-              style={[styles.label, { color: theme.colors.neutral.gray900 }]}
-            >
-              GST State
-            </Text>
-            <TouchableOpacity
-              style={[
-                styles.selectButton,
-                {
-                  borderColor: theme.colors.neutral.gray300,
-                  backgroundColor: theme.colors.neutral.white,
-                },
-              ]}
-              onPress={() => setShowGstStateDropdown(!showGstStateDropdown)}
-            >
-              <Text
-                style={[
-                  styles.selectButtonText,
-                  {
-                    color: values.gstState
-                      ? theme.colors.neutral.gray900
-                      : theme.colors.neutral.gray400,
-                  },
-                ]}
-              >
-                {values.gstState || "2"}
-              </Text>
-              <Ionicons
-                name="chevron-down"
-                size={20}
-                color={theme.colors.neutral.gray500}
-              />
-            </TouchableOpacity>
-            {renderDropdown(
-              stateOptions,
-              values.gstState,
-              (value) => handleChange("gstState", value),
-              showGstStateDropdown,
-              () => setShowGstStateDropdown(false)
-            )}
-          </View>
+          <Dropdown
+            label="GST State"
+            placeholder="Select GST State"
+            options={stateOptions}
+            value={formValues.gstState}
+            onSelect={(value) => updateField("gstState", value)}
+          />
         </CollapsibleSection>
       </ScrollView>
 
@@ -970,16 +636,9 @@ export const TravellerDetailsScreen: React.FC = () => {
       >
         <Button
           title="Continue"
-          onPress={() => {
-            router.push({
-              pathname: "/(createPolicy)/select-policy",
-              params: {
-                travellerNumber: travellerNumber,
-              },
-            });
-          }} //{handleSubmit}
-          loading={isSubmitting}
-          disabled={isSubmitting}
+          onPress={handleSubmit}
+          loading={isLoading}
+          disabled={isLoading}
           fullWidth
           size="large"
           style={[
@@ -1017,6 +676,17 @@ const styles = StyleSheet.create({
   placeholder: {
     width: 40,
     height: 40,
+  },
+  errorContainer: {
+    marginHorizontal: 16,
+    marginBottom: 16,
+    padding: 12,
+    borderRadius: 8,
+  },
+  errorText: {
+    fontSize: 12,
+    textAlign: "center",
+    fontWeight: "500",
   },
   content: {
     flex: 1,
@@ -1106,43 +776,6 @@ const styles = StyleSheet.create({
   dateInputText: {
     fontSize: 16,
   },
-  selectButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  selectButtonText: {
-    fontSize: 16,
-  },
-  dropdown: {
-    position: "absolute",
-    top: "100%",
-    left: 0,
-    right: 0,
-    maxHeight: 200,
-    borderRadius: 12,
-    borderWidth: 1,
-    zIndex: 1000,
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  dropdownScroll: {
-    flex: 1,
-  },
-  dropdownItem: {
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
-  },
-  dropdownItemText: {
-    fontSize: 16,
-  },
   dotsIcon: {
     flexDirection: "row",
     gap: 4,
@@ -1151,10 +784,6 @@ const styles = StyleSheet.create({
     width: 4,
     height: 4,
     borderRadius: 2,
-  },
-  errorText: {
-    fontSize: 12,
-    marginTop: 4,
   },
   buttonContainer: {
     position: "absolute",

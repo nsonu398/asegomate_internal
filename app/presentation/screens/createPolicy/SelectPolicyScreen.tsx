@@ -5,15 +5,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import {
-    Animated,
-    Dimensions,
-    Platform,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Animated,
+  Dimensions,
+  Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 const { height: screenHeight } = Dimensions.get('window');
@@ -223,7 +223,7 @@ export const SelectPolicyScreen: React.FC = () => {
     if (plan.isSelected) {
       return isDarkMode ? theme.colors.primary.main + '30' : '#E0FFFE';
     }
-    return isDarkMode ? theme.colors.neutral.gray300 : theme.colors.neutral.white;
+    return isDarkMode ? theme.colors.neutral.gray100 : theme.colors.neutral.white;
   };
 
   const getCardBorderColor = (plan: InsurancePlan) => {
@@ -274,8 +274,8 @@ export const SelectPolicyScreen: React.FC = () => {
         {/* Same as Traveller 1 Option */}
         <TouchableOpacity 
           style={[styles.sameAsTravellerOption, {
-            backgroundColor: theme.colors.neutral.white,
-            borderColor: theme.colors.neutral.gray200
+            backgroundColor: theme.colors.neutral.gray100,
+            borderColor: theme.colors.neutral.gray300
           }]}
           onPress={() => setSameAsTraveller1(!sameAsTraveller1)}
         >
@@ -318,7 +318,7 @@ export const SelectPolicyScreen: React.FC = () => {
               )}
 
               {/* Provider Header with Logo Background */}
-              <View style={[styles.providerHeaderContainer, { backgroundColor: '#FFE8E8' }]}>
+              <View style={[styles.providerHeaderContainer, { backgroundColor: theme.colors.neutral.sOrange }]}>
                 <View style={styles.providerContent}>
                   <View style={styles.providerLogoSection}>
                     <View style={styles.providerLogo}>
@@ -429,6 +429,10 @@ export const SelectPolicyScreen: React.FC = () => {
             </View>
           ))}
         </View>
+
+        <View style={{height:110}}>
+
+        </View>
       </ScrollView>
 
       {/* Bottom Section with Expandable Summary */}
@@ -437,7 +441,7 @@ export const SelectPolicyScreen: React.FC = () => {
           style={[
             styles.summarySection,
             {
-              backgroundColor: theme.colors.neutral.white,
+              backgroundColor: theme.colors.neutral.gray100,
               height: isExpanded 
                 ? animationValue.interpolate({
                     inputRange: [0, 1],

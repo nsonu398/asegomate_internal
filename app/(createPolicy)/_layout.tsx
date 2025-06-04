@@ -1,16 +1,20 @@
 // app/(createPolicy)/_layout.tsx
-import { theme } from "@/app/theme";
 import { Stack } from "expo-router";
 import React from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { useTheme } from "../presentation/contexts/ThemeContext";
+import { TravellerDetailsProvider } from "../presentation/contexts/TravellerDetailsContext";
+import { TripDetailsProvider } from "../presentation/contexts/TripDetailsContext";
 
 function CreatePolicyNavigation() {
+const {theme} = useTheme();
   return (
     <Stack
-      screenOptions={{ 
-        headerShown: false, 
+      screenOptions={{
+        headerShown: false,
         animation: "slide_from_right",
-        contentStyle: { backgroundColor: theme.colors.neutral.background }
+        contentStyle: { backgroundColor: theme.colors.neutral.black },
+        presentation: 'card',
       }}
     >
       <Stack.Screen name="index" />
@@ -28,14 +32,22 @@ function CreatePolicyNavigation() {
 }
 
 export default function CreatePolicyLayout() {
-  return <CreatePolicyNavigation />;
+  const { theme } = useTheme();
+  return (
+   <View style={{flex: 1, backgroundColor: theme.colors.neutral.background }}>
+     <TripDetailsProvider>
+      <TravellerDetailsProvider>
+        <CreatePolicyNavigation />
+      </TravellerDetailsProvider>
+    </TripDetailsProvider>
+   </View>
+  );
 }
 
 const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: theme.colors.neutral.background,
+    alignItems: "center"
   },
 });

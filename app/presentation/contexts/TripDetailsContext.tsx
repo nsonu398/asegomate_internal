@@ -1,31 +1,28 @@
 // app/presentation/contexts/TripDetailsContext.tsx
-import React, { createContext, ReactNode, useContext, useReducer } from 'react';
+import { Country } from "@/app/core/domain/entities/Country";
+import React, { createContext, ReactNode, useContext, useReducer } from "react";
 
 // Types
-export type TripType = 'Single Trip' | 'Multi Trip' | 'Student' | 'Special';
-export type TripDuration = '180' | '365';
+export type TripType = "Single Trip" | "Multi Trip" | "Student" | "Special";
+export type TripDuration = "180" | "365";
 
-export interface Destination {
-  id: string;
-  name: string;
-  country: string;
-}
+export interface Destination extends Country {}
 
 export interface TripDetails {
   // Trip Configuration
   tripType: TripType;
   region: string;
   destination: Destination | null;
-  
+
   // Duration Settings
   tripDuration: TripDuration;
   startDate: string;
   endDate: string;
   tripDays: number;
-  
+
   // Travellers
   numberOfTravellers: number;
-  
+
   // Additional Info
   totalTripCost?: number;
   hasPaidActivities?: boolean;
@@ -36,7 +33,7 @@ export interface TripDetailsState {
   tripDetails: TripDetails;
   isLoading: boolean;
   error: string | null;
-  
+
   // Validation states
   validationErrors: {
     destination?: string;
@@ -44,7 +41,7 @@ export interface TripDetailsState {
     endDate?: string;
     numberOfTravellers?: string;
   };
-  
+
   // UI states
   isValid: boolean;
   canProceed: boolean;
@@ -52,31 +49,39 @@ export interface TripDetailsState {
 
 // Actions
 type TripDetailsAction =
-  | { type: 'SET_TRIP_TYPE'; payload: TripType }
-  | { type: 'SET_REGION'; payload: string }
-  | { type: 'SET_DESTINATION'; payload: Destination | null }
-  | { type: 'SET_TRIP_DURATION'; payload: TripDuration }
-  | { type: 'SET_START_DATE'; payload: string }
-  | { type: 'SET_END_DATE'; payload: string }
-  | { type: 'SET_TRIP_DAYS'; payload: number }
-  | { type: 'SET_NUMBER_OF_TRAVELLERS'; payload: number }
-  | { type: 'SET_ADDITIONAL_INFO'; payload: Partial<Pick<TripDetails, 'totalTripCost' | 'hasPaidActivities' | 'hasPrePaidAccommodation'>> }
-  | { type: 'UPDATE_MULTIPLE_FIELDS'; payload: Partial<TripDetails> }
-  | { type: 'CALCULATE_TRIP_DAYS' }
-  | { type: 'VALIDATE_FORM' }
-  | { type: 'SET_ERROR'; payload: string }
-  | { type: 'CLEAR_ERROR' }
-  | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'RESET_FORM' };
+  | { type: "SET_TRIP_TYPE"; payload: TripType }
+  | { type: "SET_REGION"; payload: string }
+  | { type: "SET_DESTINATION"; payload: Destination | null }
+  | { type: "SET_TRIP_DURATION"; payload: TripDuration }
+  | { type: "SET_START_DATE"; payload: string }
+  | { type: "SET_END_DATE"; payload: string }
+  | { type: "SET_TRIP_DAYS"; payload: number }
+  | { type: "SET_NUMBER_OF_TRAVELLERS"; payload: number }
+  | {
+      type: "SET_ADDITIONAL_INFO";
+      payload: Partial<
+        Pick<
+          TripDetails,
+          "totalTripCost" | "hasPaidActivities" | "hasPrePaidAccommodation"
+        >
+      >;
+    }
+  | { type: "UPDATE_MULTIPLE_FIELDS"; payload: Partial<TripDetails> }
+  | { type: "CALCULATE_TRIP_DAYS" }
+  | { type: "VALIDATE_FORM" }
+  | { type: "SET_ERROR"; payload: string }
+  | { type: "CLEAR_ERROR" }
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "RESET_FORM" };
 
 // Initial state
 const initialTripDetails: TripDetails = {
-  tripType: 'Single Trip',
-  region: '',
+  tripType: "Single Trip",
+  region: "",
   destination: null,
-  tripDuration: '180',
-  startDate: '',
-  endDate: '',
+  tripDuration: "180",
+  startDate: "",
+  endDate: "",
   tripDays: 1,
   numberOfTravellers: 1,
 };
@@ -92,33 +97,33 @@ const initialState: TripDetailsState = {
 
 // Validation helper
 const validateTripDetails = (tripDetails: TripDetails) => {
-  const errors: TripDetailsState['validationErrors'] = {};
-  
+  const errors: TripDetailsState["validationErrors"] = {};
+
   if (!tripDetails.destination) {
-    errors.destination = 'Please select a destination';
+    errors.destination = "Please select a destination";
   }
-  
+
   if (!tripDetails.startDate) {
-    errors.startDate = 'Please select a start date';
+    errors.startDate = "Please select a start date";
   }
-  
+
   if (!tripDetails.endDate) {
-    errors.endDate = 'Please select an end date';
+    errors.endDate = "Please select an end date";
   }
-  
+
   if (tripDetails.startDate && tripDetails.endDate) {
     const start = new Date(tripDetails.startDate);
     const end = new Date(tripDetails.endDate);
-    
+
     if (end <= start) {
-      errors.endDate = 'End date must be after start date';
+      errors.endDate = "End date must be after start date";
     }
   }
-  
+
   if (tripDetails.numberOfTravellers < 1) {
-    errors.numberOfTravellers = 'At least one traveller is required';
+    errors.numberOfTravellers = "At least one traveller is required";
   }
-  
+
   return errors;
 };
 
@@ -128,16 +133,20 @@ const calculateTripDays = (startDate: string, endDate: string): number => {
   
   const start = new Date(startDate);
   const end = new Date(endDate);
-  const diffTime = Math.abs(end.getTime() - start.getTime());
+  const diffTime = end.getTime() - start.getTime();
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   
-  return Math.max(1, diffDays);
+  // If you want it to match the new logic:
+  return Math.max(1, diffDays+1); // This would be the gap between dates
 };
 
 // Reducer
-const tripDetailsReducer = (state: TripDetailsState, action: TripDetailsAction): TripDetailsState => {
+const tripDetailsReducer = (
+  state: TripDetailsState,
+  action: TripDetailsAction
+): TripDetailsState => {
   switch (action.type) {
-    case 'SET_TRIP_TYPE':
+    case "SET_TRIP_TYPE":
       return {
         ...state,
         tripDetails: {
@@ -145,8 +154,8 @@ const tripDetailsReducer = (state: TripDetailsState, action: TripDetailsAction):
           tripType: action.payload,
         },
       };
-      
-    case 'SET_REGION':
+
+    case "SET_REGION":
       return {
         ...state,
         tripDetails: {
@@ -154,8 +163,8 @@ const tripDetailsReducer = (state: TripDetailsState, action: TripDetailsAction):
           region: action.payload,
         },
       };
-      
-    case 'SET_DESTINATION':
+
+    case "SET_DESTINATION":
       return {
         ...state,
         tripDetails: {
@@ -167,8 +176,8 @@ const tripDetailsReducer = (state: TripDetailsState, action: TripDetailsAction):
           destination: undefined,
         },
       };
-      
-    case 'SET_TRIP_DURATION':
+
+    case "SET_TRIP_DURATION":
       return {
         ...state,
         tripDetails: {
@@ -176,18 +185,21 @@ const tripDetailsReducer = (state: TripDetailsState, action: TripDetailsAction):
           tripDuration: action.payload,
         },
       };
-      
-    case 'SET_START_DATE': {
+
+    case "SET_START_DATE": {
       const newTripDetails = {
         ...state.tripDetails,
         startDate: action.payload,
       };
-      
+
       // Auto-calculate trip days if end date exists
       if (newTripDetails.endDate) {
-        newTripDetails.tripDays = calculateTripDays(action.payload, newTripDetails.endDate);
+        newTripDetails.tripDays = calculateTripDays(
+          action.payload,
+          newTripDetails.endDate
+        );
       }
-      
+
       return {
         ...state,
         tripDetails: newTripDetails,
@@ -197,18 +209,21 @@ const tripDetailsReducer = (state: TripDetailsState, action: TripDetailsAction):
         },
       };
     }
-    
-    case 'SET_END_DATE': {
+
+    case "SET_END_DATE": {
       const newTripDetails = {
         ...state.tripDetails,
         endDate: action.payload,
       };
-      
+
       // Auto-calculate trip days if start date exists
       if (newTripDetails.startDate) {
-        newTripDetails.tripDays = calculateTripDays(newTripDetails.startDate, action.payload);
+        newTripDetails.tripDays = calculateTripDays(
+          newTripDetails.startDate,
+          action.payload
+        );
       }
-      
+
       return {
         ...state,
         tripDetails: newTripDetails,
@@ -218,17 +233,38 @@ const tripDetailsReducer = (state: TripDetailsState, action: TripDetailsAction):
         },
       };
     }
-    
-    case 'SET_TRIP_DAYS':
+
+    case "SET_TRIP_DAYS": {
+      const newTripDays = Math.max(1, action.payload);
+      const newTripDetails = {
+        ...state.tripDetails,
+        tripDays: newTripDays,
+      };
+
+      // Auto-calculate end date if start date exists
+      if (newTripDetails.startDate) {
+        const startDate = new Date(newTripDetails.startDate);
+
+        // Calculate end date: start date + (trip days - 1)
+        // -1 because if it's a 1-day trip, start and end dates should be the same
+        const endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + newTripDays - 1);
+
+        // Format as YYYY-MM-DD for consistency
+        newTripDetails.endDate = endDate.toISOString().split("T")[0];
+      }
+
       return {
         ...state,
-        tripDetails: {
-          ...state.tripDetails,
-          tripDays: Math.max(1, action.payload),
+        tripDetails: newTripDetails,
+        validationErrors: {
+          ...state.validationErrors,
+          endDate: undefined, // Clear any existing end date validation errors
         },
       };
-      
-    case 'SET_NUMBER_OF_TRAVELLERS':
+    }
+
+    case "SET_NUMBER_OF_TRAVELLERS":
       return {
         ...state,
         tripDetails: {
@@ -240,8 +276,8 @@ const tripDetailsReducer = (state: TripDetailsState, action: TripDetailsAction):
           numberOfTravellers: undefined,
         },
       };
-      
-    case 'SET_ADDITIONAL_INFO':
+
+    case "SET_ADDITIONAL_INFO":
       return {
         ...state,
         tripDetails: {
@@ -249,8 +285,8 @@ const tripDetailsReducer = (state: TripDetailsState, action: TripDetailsAction):
           ...action.payload,
         },
       };
-      
-    case 'UPDATE_MULTIPLE_FIELDS':
+
+    case "UPDATE_MULTIPLE_FIELDS":
       return {
         ...state,
         tripDetails: {
@@ -258,11 +294,11 @@ const tripDetailsReducer = (state: TripDetailsState, action: TripDetailsAction):
           ...action.payload,
         },
       };
-      
-    case 'CALCULATE_TRIP_DAYS': {
+
+    case "CALCULATE_TRIP_DAYS": {
       const { startDate, endDate } = state.tripDetails;
       const tripDays = calculateTripDays(startDate, endDate);
-      
+
       return {
         ...state,
         tripDetails: {
@@ -271,11 +307,11 @@ const tripDetailsReducer = (state: TripDetailsState, action: TripDetailsAction):
         },
       };
     }
-    
-    case 'VALIDATE_FORM': {
+
+    case "VALIDATE_FORM": {
       const validationErrors = validateTripDetails(state.tripDetails);
       const isValid = Object.keys(validationErrors).length === 0;
-      
+
       return {
         ...state,
         validationErrors,
@@ -283,32 +319,32 @@ const tripDetailsReducer = (state: TripDetailsState, action: TripDetailsAction):
         canProceed: isValid,
       };
     }
-    
-    case 'SET_ERROR':
+
+    case "SET_ERROR":
       return {
         ...state,
         error: action.payload,
         isLoading: false,
       };
-      
-    case 'CLEAR_ERROR':
+
+    case "CLEAR_ERROR":
       return {
         ...state,
         error: null,
       };
-      
-    case 'SET_LOADING':
+
+    case "SET_LOADING":
       return {
         ...state,
         isLoading: action.payload,
       };
-      
-    case 'RESET_FORM':
+
+    case "RESET_FORM":
       return {
         ...initialState,
         tripDetails: { ...initialTripDetails },
       };
-      
+
     default:
       return state;
   }
@@ -325,26 +361,35 @@ interface TripDetailsContextType extends TripDetailsState {
   setEndDate: (date: string) => void;
   setTripDays: (days: number) => void;
   setNumberOfTravellers: (count: number) => void;
-  setAdditionalInfo: (info: Partial<Pick<TripDetails, 'totalTripCost' | 'hasPaidActivities' | 'hasPrePaidAccommodation'>>) => void;
+  setAdditionalInfo: (
+    info: Partial<
+      Pick<
+        TripDetails,
+        "totalTripCost" | "hasPaidActivities" | "hasPrePaidAccommodation"
+      >
+    >
+  ) => void;
   updateMultipleFields: (fields: Partial<TripDetails>) => void;
-  
+
   // Utilities
   calculateTripDays: () => void;
   validateForm: () => boolean;
   resetForm: () => void;
-  
+
   // State management
   setError: (error: string) => void;
   clearError: () => void;
   setLoading: (loading: boolean) => void;
-  
+
   // Computed properties
   getFormattedDuration: () => string;
   getTripSummary: () => string;
   isMinimumRequirementsMet: () => boolean;
 }
 
-const TripDetailsContext = createContext<TripDetailsContextType | undefined>(undefined);
+const TripDetailsContext = createContext<TripDetailsContextType | undefined>(
+  undefined
+);
 
 // Provider
 interface TripDetailsProviderProps {
@@ -352,9 +397,9 @@ interface TripDetailsProviderProps {
   initialData?: Partial<TripDetails>;
 }
 
-export const TripDetailsProvider: React.FC<TripDetailsProviderProps> = ({ 
-  children, 
-  initialData 
+export const TripDetailsProvider: React.FC<TripDetailsProviderProps> = ({
+  children,
+  initialData,
 }) => {
   const [state, dispatch] = useReducer(tripDetailsReducer, {
     ...initialState,
@@ -366,102 +411,109 @@ export const TripDetailsProvider: React.FC<TripDetailsProviderProps> = ({
 
   // Actions
   const setTripType = (tripType: TripType) => {
-    dispatch({ type: 'SET_TRIP_TYPE', payload: tripType });
+    dispatch({ type: "SET_TRIP_TYPE", payload: tripType });
   };
 
   const setRegion = (region: string) => {
-    dispatch({ type: 'SET_REGION', payload: region });
+    dispatch({ type: "SET_REGION", payload: region });
   };
 
   const setDestination = (destination: Destination | null) => {
-    dispatch({ type: 'SET_DESTINATION', payload: destination });
+    dispatch({ type: "SET_DESTINATION", payload: destination });
   };
 
   const setTripDuration = (duration: TripDuration) => {
-    dispatch({ type: 'SET_TRIP_DURATION', payload: duration });
+    dispatch({ type: "SET_TRIP_DURATION", payload: duration });
   };
 
   const setStartDate = (date: string) => {
-    dispatch({ type: 'SET_START_DATE', payload: date });
+    dispatch({ type: "SET_START_DATE", payload: date });
   };
 
   const setEndDate = (date: string) => {
-    dispatch({ type: 'SET_END_DATE', payload: date });
+    dispatch({ type: "SET_END_DATE", payload: date });
   };
 
   const setTripDays = (days: number) => {
-    dispatch({ type: 'SET_TRIP_DAYS', payload: days });
+    dispatch({ type: "SET_TRIP_DAYS", payload: days });
   };
 
   const setNumberOfTravellers = (count: number) => {
-    dispatch({ type: 'SET_NUMBER_OF_TRAVELLERS', payload: count });
+    dispatch({ type: "SET_NUMBER_OF_TRAVELLERS", payload: count });
   };
 
-  const setAdditionalInfo = (info: Partial<Pick<TripDetails, 'totalTripCost' | 'hasPaidActivities' | 'hasPrePaidAccommodation'>>) => {
-    dispatch({ type: 'SET_ADDITIONAL_INFO', payload: info });
+  const setAdditionalInfo = (
+    info: Partial<
+      Pick<
+        TripDetails,
+        "totalTripCost" | "hasPaidActivities" | "hasPrePaidAccommodation"
+      >
+    >
+  ) => {
+    dispatch({ type: "SET_ADDITIONAL_INFO", payload: info });
   };
 
   const updateMultipleFields = (fields: Partial<TripDetails>) => {
-    dispatch({ type: 'UPDATE_MULTIPLE_FIELDS', payload: fields });
+    dispatch({ type: "UPDATE_MULTIPLE_FIELDS", payload: fields });
   };
 
   // Utilities
   const calculateTripDaysAction = () => {
-    dispatch({ type: 'CALCULATE_TRIP_DAYS' });
+    dispatch({ type: "CALCULATE_TRIP_DAYS" });
   };
 
   const validateForm = (): boolean => {
-    dispatch({ type: 'VALIDATE_FORM' });
+    dispatch({ type: "VALIDATE_FORM" });
     const errors = validateTripDetails(state.tripDetails);
     return Object.keys(errors).length === 0;
   };
 
   const resetForm = () => {
-    dispatch({ type: 'RESET_FORM' });
+    dispatch({ type: "RESET_FORM" });
   };
 
   // State management
   const setError = (error: string) => {
-    dispatch({ type: 'SET_ERROR', payload: error });
+    dispatch({ type: "SET_ERROR", payload: error });
   };
 
   const clearError = () => {
-    dispatch({ type: 'CLEAR_ERROR' });
+    dispatch({ type: "CLEAR_ERROR" });
   };
 
   const setLoading = (loading: boolean) => {
-    dispatch({ type: 'SET_LOADING', payload: loading });
+    dispatch({ type: "SET_LOADING", payload: loading });
   };
 
   // Computed properties
   const getFormattedDuration = (): string => {
     const { startDate, endDate, tripDays } = state.tripDetails;
-    
+
     if (startDate && endDate) {
       const start = new Date(startDate).toLocaleDateString();
       const end = new Date(endDate).toLocaleDateString();
       return `${start} - ${end} (${tripDays} days)`;
     }
-    
-    return `${tripDays} day${tripDays !== 1 ? 's' : ''}`;
+
+    return `${tripDays} day${tripDays !== 1 ? "s" : ""}`;
   };
 
   const getTripSummary = (): string => {
     const { destination, numberOfTravellers, tripDays } = state.tripDetails;
-    
+
     const parts = [];
-    
+
     if (destination) {
-      parts.push(destination.name);
+      parts.push(destination.countryName);
     }
-    
+
     if (numberOfTravellers > 1) {
       parts.push(`${numberOfTravellers} travellers`);
     }
-    
-    parts.push(`${tripDays} day${tripDays !== 1 ? 's' : ''}`);
-    
-    return parts.join(' • ');
+
+    parts.push(`${tripDays} day${tripDays !== 1 ? "s" : ""}`);
+
+    return parts.join(" • ");
   };
 
   const isMinimumRequirementsMet = (): boolean => {
@@ -471,7 +523,7 @@ export const TripDetailsProvider: React.FC<TripDetailsProviderProps> = ({
 
   const contextValue: TripDetailsContextType = {
     ...state,
-    
+
     // Actions
     setTripType,
     setRegion,
@@ -483,17 +535,17 @@ export const TripDetailsProvider: React.FC<TripDetailsProviderProps> = ({
     setNumberOfTravellers,
     setAdditionalInfo,
     updateMultipleFields,
-    
+
     // Utilities
     calculateTripDays: calculateTripDaysAction,
     validateForm,
     resetForm,
-    
+
     // State management
     setError,
     clearError,
     setLoading,
-    
+
     // Computed properties
     getFormattedDuration,
     getTripSummary,
@@ -511,7 +563,7 @@ export const TripDetailsProvider: React.FC<TripDetailsProviderProps> = ({
 export const useTripDetails = (): TripDetailsContextType => {
   const context = useContext(TripDetailsContext);
   if (context === undefined) {
-    throw new Error('useTripDetails must be used within a TripDetailsProvider');
+    throw new Error("useTripDetails must be used within a TripDetailsProvider");
   }
   return context;
 };

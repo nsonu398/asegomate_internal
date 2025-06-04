@@ -25,8 +25,8 @@ export class MasterSelectRepository implements IMasterSelectRepository {
         true
       );
       return {
-        areas: [],
-        success: false,
+        areas: response.data,
+        success: response.success,
         error: "Authentication failed",
       };
 

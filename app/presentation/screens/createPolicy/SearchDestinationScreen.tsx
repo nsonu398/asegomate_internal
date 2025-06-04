@@ -1,145 +1,199 @@
 // app/presentation/screens/createPolicy/SearchDestinationScreen.tsx
-import { Button } from '@/app/presentation/components/ui/Button';
-import { TextInput } from '@/app/presentation/components/ui/TextInput';
-import { useTheme } from '@/app/presentation/contexts/ThemeContext';
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { Country } from "@/app/core/domain/entities/Country";
+import { Button } from "@/app/presentation/components/ui/Button";
+import { TextInput } from "@/app/presentation/components/ui/TextInput";
+import { useTheme } from "@/app/presentation/contexts/ThemeContext";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
-    Platform,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from 'react-native';
+  Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { Header } from "../../components/ui/Header";
+import { useMasterData } from "../../contexts/MasterDataContext";
+import { useTripDetails } from "../../contexts/TripDetailsContext";
 
-interface Destination {
-  id: string;
-  name: string;
-  country: string;
-  isSelected: boolean;
+interface Destination extends Country {
+  isSelected?: boolean;
 }
-
-const popularDestinations: Destination[] = [
-  { id: '1', name: 'London', country: 'London, United Kingdom', isSelected: true },
-  { id: '2', name: 'Delhi', country: 'Delhi, India', isSelected: false },
-  { id: '3', name: 'Mumbai', country: 'Mumbai, India', isSelected: false },
-  { id: '4', name: 'Chennai', country: 'Chennai, India', isSelected: false },
-  { id: '5', name: 'Goa', country: 'Goa, India', isSelected: false },
-  { id: '6', name: 'Texas', country: 'Texas, United States Of America', isSelected: false },
-];
 
 interface SearchDestinationScreenProps {
-  onDestinationSelect?: (destination: Destination) => void;
-  selectedDestination?: string;
+  countryRegion: string;
 }
 
-export const SearchDestinationScreen: React.FC<SearchDestinationScreenProps> = ({
-  onDestinationSelect,
-  selectedDestination,
-}) => {
+export const SearchDestinationScreen: React.FC<
+  SearchDestinationScreenProps
+> = ({ countryRegion }) => {
   const { theme } = useTheme();
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [destinations, setDestinations] = useState<Destination[]>(
-    popularDestinations.map(dest => ({
-      ...dest,
-      isSelected: dest.name === selectedDestination
-    }))
-  );
+  const { countries } = useMasterData();
+  const { setDestination, tripDetails } = useTripDetails();
+
+  //state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [destinations, setDestinations] = useState<Destination[]>([]);
+  const [filteredDestinations, setFilteredDestinations] =
+    useState<Destination[]>();
+
+  useEffect(() => {
+    if (countryRegion && countries) {
+      setDestinations(
+        countries
+          .filter(
+            (country) =>
+              country.countryRegion.toLowerCase() ===
+              countryRegion.toLowerCase()
+          )
+          .map((country) => ({
+            ...country,
+            isSelected:
+              country.countryId === tripDetails.destination?.countryId,
+          }))
+      );
+    }
+  }, [countryRegion, countries]);
+
+  useEffect(() => {
+    if (destinations) {
+      if (searchQuery && searchQuery.length > 0) {
+        setFilteredDestinations(
+          destinations.filter((dest) =>
+            dest.countryName.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+        );
+      } else {
+        setFilteredDestinations(destinations);
+      }
+    }
+  }, [destinations, searchQuery]);
 
   const handleDestinationSelect = (destination: Destination) => {
-    setDestinations(prev =>
-      prev.map(dest => ({
+    setDestinations((prev) =>
+      prev.map((dest) => ({
         ...dest,
-        isSelected: dest.id === destination.id,
+        isSelected: dest.countryId === destination.countryId,
       }))
     );
   };
 
   const handleContinue = () => {
-    const selectedDest = destinations.find(dest => dest.isSelected);
-    if (selectedDest && onDestinationSelect) {
-      onDestinationSelect(selectedDest);
-    }
+    setDestination(destinations.find((dest) => dest.isSelected) || null);
     router.back();
   };
 
-  const filteredDestinations = destinations.filter(dest =>
-    dest.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    dest.country.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.neutral.background }]}>
-      
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: theme.colors.neutral.background },
+      ]}
+    >
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
-        </TouchableOpacity>
-      </View>
+      <Header title="Select Destination" onBackPress={() => router.back()} />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Search Input */}
-        <View style={styles.searchContainer}>
-          <TextInput
-            placeholder="Where to?"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            startIcon={<Ionicons name="search" size={20} color="#9E9E9E" />}
-            style={styles.searchInput}
-          />
-        </View>
+        <TextInput
+          startIcon={
+            <Ionicons
+              name="search"
+              size={20}
+              color={theme.colors.neutral.gray600}
+            />
+          }
+          placeholder="Where To?"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
 
         {/* Popular Destinations */}
         <View style={styles.destinationsContainer}>
-          <Text style={styles.sectionTitle}>Popular Destinations</Text>
-          
-          {filteredDestinations.map((destination) => (
-            <TouchableOpacity
-              key={destination.id}
-              style={styles.destinationItem}
-              onPress={() => handleDestinationSelect(destination)}
-              activeOpacity={0.7}
-            >
-              <View style={styles.destinationContent}>
-                <View style={styles.destinationInfo}>
-                  <View style={styles.locationIcon}>
-                    <Ionicons name="location" size={20} color="#00B5AD" />
+          <Text
+            style={[
+              styles.sectionTitle,
+              { color: theme.colors.neutral.gray900 },
+            ]}
+          >
+            Popular Destinations
+          </Text>
+
+          {filteredDestinations &&
+            filteredDestinations.length > 0 &&
+            filteredDestinations.map((destination) => (
+              <TouchableOpacity
+                key={destination.countryId}
+                style={styles.destinationItem}
+                onPress={() => handleDestinationSelect(destination)}
+                activeOpacity={0.7}
+              >
+                <View style={styles.destinationContent}>
+                  <View style={styles.destinationInfo}>
+                    <View style={styles.locationIcon}>
+                      <Ionicons
+                        name="location"
+                        size={20}
+                        color={theme.colors.primary.main}
+                      />
+                    </View>
+                    <View style={styles.destinationText}>
+                      <Text
+                        style={[
+                          styles.destinationName,
+                          { color: theme.colors.neutral.gray700 },
+                        ]}
+                      >
+                        {destination.countryName}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.destinationCountry,
+                          { color: theme.colors.neutral.gray600 },
+                        ]}
+                      >
+                        {destination.countryRegion}
+                      </Text>
+                    </View>
                   </View>
-                  <View style={styles.destinationText}>
-                    <Text style={styles.destinationName}>{destination.name}</Text>
-                    <Text style={styles.destinationCountry}>{destination.country}</Text>
+                  <View style={styles.checkboxContainer}>
+                    <View
+                      style={[
+                        styles.checkbox,
+                        destination.isSelected && styles.checkboxSelected,
+                      ]}
+                    >
+                      {destination.isSelected && (
+                        <Ionicons name="checkmark" size={16} color="#FFFFFF" />
+                      )}
+                    </View>
                   </View>
                 </View>
-                <View style={styles.checkboxContainer}>
-                  <View style={[
-                    styles.checkbox,
-                    destination.isSelected && styles.checkboxSelected
-                  ]}>
-                    {destination.isSelected && (
-                      <Ionicons name="checkmark" size={16} color="#FFFFFF" />
-                    )}
-                  </View>
-                </View>
-              </View>
-            </TouchableOpacity>
-          ))}
+              </TouchableOpacity>
+            ))}
         </View>
       </ScrollView>
 
       {/* Continue Button */}
-      <View style={styles.buttonContainer}>
+      <View
+        style={[
+          styles.buttonContainer,
+          {
+            borderColor: theme.colors.neutral.gray400,
+            backgroundColor: theme.colors.neutral.gray100,
+          },
+        ]}
+      >
         <Button
           title="Continue"
           onPress={handleContinue}
           fullWidth
           size="large"
-          style={[styles.continueButton, { backgroundColor: theme.colors.primary.main }]}
-          disabled={!destinations.some(dest => dest.isSelected)}
+          disabled={!destinations.some((dest) => dest.isSelected)}
         />
       </View>
     </View>
@@ -149,19 +203,18 @@ export const SearchDestinationScreen: React.FC<SearchDestinationScreenProps> = (
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
   },
   header: {
-    paddingTop: Platform.OS === 'ios' ? 50 : StatusBar.currentHeight || 24,
+    paddingTop: Platform.OS === "ios" ? 50 : StatusBar.currentHeight || 24,
     paddingHorizontal: 16,
     paddingBottom: 16,
-    backgroundColor: '#FFFFFF',
   },
   backButton: {
     width: 40,
     height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   content: {
     flex: 1,
@@ -172,7 +225,6 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     borderRadius: 12,
-    backgroundColor: '#F5F5F5',
     borderWidth: 0,
   },
   destinationsContainer: {
@@ -180,21 +232,20 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#000',
+    fontWeight: "600",
     marginBottom: 20,
   },
   destinationItem: {
     marginBottom: 16,
   },
   destinationContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   destinationInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     flex: 1,
   },
   locationIcon: {
@@ -205,13 +256,13 @@ const styles = StyleSheet.create({
   },
   destinationName: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#000',
+    fontWeight: "600",
+    color: "#000",
     marginBottom: 4,
   },
   destinationCountry: {
     fontSize: 14,
-    color: '#757575',
+    color: "#757575",
   },
   checkboxContainer: {
     marginLeft: 16,
@@ -221,22 +272,20 @@ const styles = StyleSheet.create({
     height: 24,
     borderRadius: 4,
     borderWidth: 2,
-    borderColor: '#E0E0E0',
-    backgroundColor: '#FFFFFF',
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderColor: "#E0E0E0",
+    backgroundColor: "#FFFFFF",
+    justifyContent: "center",
+    alignItems: "center",
   },
   checkboxSelected: {
-    backgroundColor: '#00B5AD',
-    borderColor: '#00B5AD',
+    backgroundColor: "#00B5AD",
+    borderColor: "#00B5AD",
   },
   buttonContainer: {
     paddingHorizontal: 24,
     paddingVertical: 24,
-    paddingBottom: Platform.OS === 'ios' ? 40 : 24,
-    backgroundColor: '#FFFFFF',
+    paddingBottom: Platform.OS === "ios" ? 40 : 24,
     borderTopWidth: 1,
-    borderTopColor: '#F0F0F0',
   },
   continueButton: {
     borderRadius: 12,

@@ -25,6 +25,7 @@ const darkTheme: Theme = {
       gray900: '#F5F5F5',
       white: '#FFFFFF',
       black: '#000000',
+      sOrange:"#E7F7FE"
     },
     primary: {
       ...lightTheme.colors.primary,

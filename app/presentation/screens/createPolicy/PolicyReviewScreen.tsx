@@ -6,13 +6,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    Platform,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 interface CollapsibleSectionProps {
@@ -37,7 +37,7 @@ const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
       style={[
         styles.collapsibleSection,
         {
-          backgroundColor: theme.colors.neutral.white,
+          backgroundColor: theme.colors.neutral.gray100,
           borderColor: theme.colors.neutral.gray200,
         },
       ]}
@@ -114,12 +114,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   section: {
-    marginBottom: 24,
+    marginBottom: 0,
   },
   sectionLabel: {
     fontSize: 18,
     fontWeight: '600',
-    marginBottom: 16,
+    marginBottom: 3,
   },
   radioGroup: {
     flexDirection: 'row',
@@ -408,7 +408,7 @@ export const PolicyReviewScreen: React.FC = () => {
         </View>
 
         {/* Invoice Type */}
-        <View style={styles.section}>
+        <View style={[styles.section,{marginBottom:13}]}>
           <Text
             style={[
               styles.sectionLabel,
@@ -417,7 +417,7 @@ export const PolicyReviewScreen: React.FC = () => {
           >
             Invoice Type
           </Text>
-          <View style={styles.radioGroup}>
+          <View style={[styles.radioGroup,{marginTop:6}]}>
             <TouchableOpacity
               style={styles.radioOption}
               onPress={() => setInvoiceType('passenger')}
@@ -690,8 +690,8 @@ export const PolicyReviewScreen: React.FC = () => {
           style={[
             styles.paymentDetailsContainer,
             {
-              backgroundColor: theme.colors.neutral.white,
-              borderColor: theme.colors.neutral.gray200,
+              backgroundColor: theme.colors.neutral.gray100,
+              borderColor: theme.colors.neutral.gray300,
             },
           ]}
         >

@@ -1,6 +1,6 @@
 // src/presentation/components/ui/Button.tsx
-import { theme } from '@/app/theme';
-import React from 'react';
+import { theme } from "@/app/theme";
+import React from "react";
 import {
   ActivityIndicator,
   StyleSheet,
@@ -9,12 +9,18 @@ import {
   TouchableOpacity,
   TouchableOpacityProps,
   View,
-  ViewStyle
-} from 'react-native';
+  ViewStyle,
+} from "react-native";
 
-type ButtonVariant = 'contained' | 'outlined' | 'text';
-type ButtonSize = 'small' | 'medium' | 'large';
-type ButtonColor = 'primary' | 'secondary' | 'success' | 'error' | 'warning' | 'info';
+type ButtonVariant = "contained" | "outlined" | "text";
+type ButtonSize = "small" | "medium" | "large";
+type ButtonColor =
+  | "primary"
+  | "secondary"
+  | "success"
+  | "error"
+  | "warning"
+  | "info";
 
 interface ButtonProps extends TouchableOpacityProps {
   variant?: ButtonVariant;
@@ -34,9 +40,9 @@ interface ButtonPadding {
 }
 
 export const Button: React.FC<ButtonProps> = ({
-  variant = 'contained',
-  size = 'medium',
-  color = 'primary',
+  variant = "contained",
+  size = "medium",
+  color = "primary",
   startIcon,
   endIcon,
   fullWidth = false,
@@ -47,68 +53,102 @@ export const Button: React.FC<ButtonProps> = ({
   ...rest
 }) => {
   const getBackgroundColor = (): string => {
-    if (variant === 'text' || variant === 'outlined') return 'transparent';
-    if (disabled) return theme.colors.neutral.gray300;
-    
+    if (variant === "text" || variant === "outlined") return "transparent";
+    if (disabled) return theme.colors.neutral.gray600;
+
     switch (color) {
-      case 'primary': return theme.colors.primary.main;
-      case 'secondary': return theme.colors.secondary.main;
-      case 'success': return theme.colors.feedback.success;
-      case 'error': return theme.colors.feedback.error;
-      case 'warning': return theme.colors.feedback.warning;
-      case 'info': return theme.colors.feedback.info;
-      default: return theme.colors.primary.main;
+      case "primary":
+        return theme.colors.primary.main;
+      case "secondary":
+        return theme.colors.secondary.main;
+      case "success":
+        return theme.colors.feedback.success;
+      case "error":
+        return theme.colors.feedback.error;
+      case "warning":
+        return theme.colors.feedback.warning;
+      case "info":
+        return theme.colors.feedback.info;
+      default:
+        return theme.colors.primary.main;
     }
   };
 
   const getTextColor = (): string => {
     if (disabled) return theme.colors.neutral.gray500;
-    if (variant === 'contained') {
-      return color === 'secondary' || color === 'warning' 
-        ? theme.colors.neutral.black 
+    if (variant === "contained") {
+      return color === "secondary" || color === "warning"
+        ? theme.colors.neutral.black
         : theme.colors.neutral.white;
     }
-    
+
     switch (color) {
-      case 'primary': return theme.colors.primary.main;
-      case 'secondary': return theme.colors.secondary.main;
-      case 'success': return theme.colors.feedback.success;
-      case 'error': return theme.colors.feedback.error;
-      case 'warning': return theme.colors.feedback.warning;
-      case 'info': return theme.colors.feedback.info;
-      default: return theme.colors.primary.main;
+      case "primary":
+        return theme.colors.primary.main;
+      case "secondary":
+        return theme.colors.secondary.main;
+      case "success":
+        return theme.colors.feedback.success;
+      case "error":
+        return theme.colors.feedback.error;
+      case "warning":
+        return theme.colors.feedback.warning;
+      case "info":
+        return theme.colors.feedback.info;
+      default:
+        return theme.colors.primary.main;
     }
   };
 
   const getBorderColor = (): string => {
-    if (variant !== 'outlined') return 'transparent';
+    if (variant !== "outlined") return "transparent";
     if (disabled) return theme.colors.neutral.gray300;
-    
+
     switch (color) {
-      case 'primary': return theme.colors.primary.main;
-      case 'secondary': return theme.colors.secondary.main;
-      case 'success': return theme.colors.feedback.success;
-      case 'error': return theme.colors.feedback.error;
-      case 'warning': return theme.colors.feedback.warning;
-      case 'info': return theme.colors.feedback.info;
-      default: return theme.colors.primary.main;
+      case "primary":
+        return theme.colors.primary.main;
+      case "secondary":
+        return theme.colors.secondary.main;
+      case "success":
+        return theme.colors.feedback.success;
+      case "error":
+        return theme.colors.feedback.error;
+      case "warning":
+        return theme.colors.feedback.warning;
+      case "info":
+        return theme.colors.feedback.info;
+      default:
+        return theme.colors.primary.main;
     }
   };
 
   const getPadding = (): ButtonPadding => {
     switch (size) {
-      case 'small': return { paddingVertical: theme.spacing.xs, paddingHorizontal: theme.spacing.sm };
-      case 'medium': return { paddingVertical: theme.spacing.sm, paddingHorizontal: theme.spacing.md };
-      case 'large': return { paddingVertical: 14, paddingHorizontal: theme.spacing.lg };
-      default: return { paddingVertical: theme.spacing.sm, paddingHorizontal: theme.spacing.md };
+      case "small":
+        return {
+          paddingVertical: theme.spacing.xs,
+          paddingHorizontal: theme.spacing.sm,
+        };
+      case "medium":
+        return {
+          paddingVertical: theme.spacing.sm,
+          paddingHorizontal: theme.spacing.md,
+        };
+      case "large":
+        return { paddingVertical: 14, paddingHorizontal: theme.spacing.lg };
+      default:
+        return {
+          paddingVertical: theme.spacing.sm,
+          paddingHorizontal: theme.spacing.md,
+        };
     }
   };
 
   const buttonStyles: ViewStyle = {
     backgroundColor: getBackgroundColor(),
     borderColor: getBorderColor(),
-    borderWidth: variant === 'outlined' ? 1 : 0,
-    width: fullWidth ? '100%' : 'auto',
+    borderWidth: variant === "outlined" ? 1 : 0,
+    width: fullWidth ? "100%" : "auto",
     ...getPadding(),
   };
 
@@ -121,10 +161,10 @@ export const Button: React.FC<ButtonProps> = ({
     >
       <View style={styles.contentContainer}>
         {loading ? (
-          <ActivityIndicator 
-            size="small" 
-            color={getTextColor()} 
-            style={styles.loader} 
+          <ActivityIndicator
+            size="small"
+            color={getTextColor()}
+            style={styles.loader}
           />
         ) : (
           <>
@@ -143,13 +183,13 @@ export const Button: React.FC<ButtonProps> = ({
 const styles = StyleSheet.create({
   button: {
     borderRadius: theme.border.radius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   contentContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
   text: {
     fontSize: theme.typography.fontSize.lg,

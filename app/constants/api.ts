@@ -18,6 +18,6 @@ export const API_ENDPOINTS = {
     GEOGRAPHICAL_AREAS: '/asego/api/v1/masterSelect/GEOGRAPHICAL_AREA',
   },
   COUNTRIES: {
-    LIST: 'asego/api/v1/country',
+    LIST: '/asego/api/v1/country',
   },
 };
