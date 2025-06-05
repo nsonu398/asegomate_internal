@@ -2,19 +2,20 @@
 import { Stack } from "expo-router";
 import React from "react";
 import { StyleSheet, View } from "react-native";
+import { PolicyProvider } from "../presentation/contexts/PolicyContext";
 import { useTheme } from "../presentation/contexts/ThemeContext";
 import { TravellerDetailsProvider } from "../presentation/contexts/TravellerDetailsContext";
 import { TripDetailsProvider } from "../presentation/contexts/TripDetailsContext";
 
 function CreatePolicyNavigation() {
-const {theme} = useTheme();
+  const { theme } = useTheme();
   return (
     <Stack
       screenOptions={{
         headerShown: false,
         animation: "slide_from_right",
         contentStyle: { backgroundColor: theme.colors.neutral.black },
-        presentation: 'card',
+        presentation: "card",
       }}
     >
       <Stack.Screen name="index" />
@@ -34,13 +35,15 @@ const {theme} = useTheme();
 export default function CreatePolicyLayout() {
   const { theme } = useTheme();
   return (
-   <View style={{flex: 1, backgroundColor: theme.colors.neutral.background }}>
-     <TripDetailsProvider>
-      <TravellerDetailsProvider>
-        <CreatePolicyNavigation />
-      </TravellerDetailsProvider>
-    </TripDetailsProvider>
-   </View>
+    <View style={{ flex: 1, backgroundColor: theme.colors.neutral.background }}>
+      <PolicyProvider>
+        <TripDetailsProvider>
+          <TravellerDetailsProvider>
+            <CreatePolicyNavigation />
+          </TravellerDetailsProvider>
+        </TripDetailsProvider>
+      </PolicyProvider>
+    </View>
   );
 }
 
@@ -48,6 +51,6 @@ const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
   },
 });

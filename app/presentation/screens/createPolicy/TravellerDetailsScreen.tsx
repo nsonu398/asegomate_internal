@@ -18,6 +18,9 @@ import {
 } from "react-native";
 import { Dropdown } from "../../components/ui/Dropdown";
 import { useApp } from "../../contexts/AppContext";
+import { useMasterData } from "../../contexts/MasterDataContext";
+import { usePolicy } from "../../contexts/PolicyContext";
+import { useTripDetails } from "../../contexts/TripDetailsContext";
 
 interface CollapsibleSectionProps {
   title: string;
@@ -128,6 +131,10 @@ export const TravellerDetailsScreen: React.FC = () => {
   const router = useRouter();
   const params = useLocalSearchParams();
   const { setCalendarCallback } = useApp();
+  const { fetchPlans } = usePolicy();
+  const { user } = useApp();
+  const { tripDetails } = useTripDetails();
+  const { regions } = useMasterData();
 
   const {
     formValues,
@@ -172,8 +179,23 @@ export const TravellerDetailsScreen: React.FC = () => {
     setError(null);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Calculate age from date of birth
+      const birthDate = new Date(formValues.dateOfBirth);
+      const today = new Date();
+      const age = today.getFullYear() - birthDate.getFullYear();
+
+      // Fetch plans for this traveller
+      // You'll need to get duration from trip context and category from somewhere
+      fetchPlans({
+        duration: 20, // Get from trip context
+        age: age,
+        category:
+          regions?.find(
+            (reg) =>
+              reg?.name?.toLowerCase() == tripDetails?.region?.toLowerCase()
+          )?.id ?? "0", // This should come from somewhere
+        partnerId: user?.orgId == "0" ? "" : user?.orgId, // Default to 1 if orgId is 0
+      });
 
       // Navigate to policy selection screen
       router.push({

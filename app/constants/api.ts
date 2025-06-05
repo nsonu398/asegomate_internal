@@ -20,4 +20,7 @@ export const API_ENDPOINTS = {
   COUNTRIES: {
     LIST: '/asego/api/v1/country',
   },
+  POLICY: {
+    CHOOSE_PLAN: '/asego/api/v1/chooseplan',
+  },
 };

@@ -306,7 +306,7 @@ export const TripDetailsScreen: React.FC = () => {
                   styles.selectButtonText,
                   {
                     color: tripDetails.region
-                      ? theme.colors.neutral.white
+                      ? theme.colors.neutral.gray900
                       : theme.colors.neutral.gray500,
                   },
                 ]}

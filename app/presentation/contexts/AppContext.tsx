@@ -1,8 +1,16 @@
 // src/presentation/contexts/AppContext.tsx
-import React, { createContext, ReactNode, useContext, useState } from "react";
+import React, {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import localStorage from '../../core/data/datasources/local/LocalStorage';
 import { AuthProvider } from "./AuthContext";
 import { MasterDataProvider } from "./MasterDataContext";
 import { ThemeProvider } from "./ThemeContext";
+
 
 // Interface for the context type
 interface AppContextType {
@@ -11,6 +19,7 @@ interface AppContextType {
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   clearError: () => void;
+  user: any | null;
 
   // Calendar callback functionality
   setCalendarCallback: (callback: (date: string) => void) => void;
@@ -31,6 +40,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [calendarCallback, setCalendarCallbackState] = useState<
     ((date: string) => void) | null
   >(null);
+  const [user, setUser] = useState<any | null>(null);
 
   const setLoading = (loading: boolean) => {
     setIsLoading(loading);
@@ -55,9 +65,24 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setCalendarCallbackState(null);
   };
 
+  //initialize user state from localStorage or set to null
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const _user = await localStorage.getItem("auth_user");
+        setUser(_user || null);
+      } catch (e) {
+        console.error("Error fetching auth_user from localStorage", e);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
   const contextValue: AppContextType = {
     isLoading,
     error,
+    user,
     setLoading,
     setError,
     clearError,

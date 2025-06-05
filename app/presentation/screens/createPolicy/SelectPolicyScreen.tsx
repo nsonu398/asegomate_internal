@@ -3,7 +3,7 @@ import { Button } from '@/app/presentation/components/ui/Button';
 import { useTheme } from '@/app/presentation/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Dimensions,
@@ -15,6 +15,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import { usePolicy } from '../../contexts/PolicyContext';
 
 const { height: screenHeight } = Dimensions.get('window');
 
@@ -38,6 +39,7 @@ export const SelectPolicyScreen: React.FC = () => {
   const { theme, isDarkMode } = useTheme();
   const router = useRouter();
   const params = useLocalSearchParams();
+  const {availablePlans} = usePolicy();
   
   const travellerNumber = params.travellerNumber || '2';
   
@@ -232,6 +234,10 @@ export const SelectPolicyScreen: React.FC = () => {
     }
     return isDarkMode ? theme.colors.neutral.gray400 : theme.colors.neutral.gray200;
   };
+
+  useEffect(() => {
+    console.log(availablePlans);    
+  }, [availablePlans]);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.neutral.background }]}>
