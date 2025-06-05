@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useTravellerDetails } from "../../contexts/TravellerDetailsContext";
 
 interface AddOn {
   id: string;
@@ -27,6 +28,7 @@ export const AddOnsSelectionScreen: React.FC = () => {
   const { theme, isDarkMode } = useTheme();
   const router = useRouter();
   const params = useLocalSearchParams();
+  const {markTravellerAddOnsSelected, areAllTravellersComplete} = useTravellerDetails();
 
   const planId = params.planId as string;
   const travellerNumber = params.travellerNumber as string;
@@ -77,20 +79,26 @@ export const AddOnsSelectionScreen: React.FC = () => {
     );
   };
 
-  const handleBack = () => {
-    // Navigate back and pass selected add-ons data
-    const selectedCount = addOns.filter((addon) => addon.isSelected).length;
-    router.back();
-    router.setParams({
-      selectedAddOnsCount: selectedCount.toString(),
-      planId: planId,
-    });
-  };
+  // In AddOnsSelectionScreen.tsx, update the handleContinue method:
 
-  const handleContinue = () => {
-    // Navigate to next step with selected add-ons
-    //router.push('/(createPolicy)/summary');
-  };
+const handleContinue = () => {
+  // Mark add-ons as selected for this traveller (optional step)
+  markTravellerAddOnsSelected("");
+
+  // Check if all travellers are complete
+  if (areAllTravellersComplete()) {
+    // All travellers have completed their details and policy selection
+    router.push('/(createPolicy)/policy-review');
+  } else {
+    // Navigate back to traveller selection to continue with other travellers
+    router.push('/(createPolicy)/traveller-selection');
+  }
+};
+
+// Also update the handleBack method to go back to policy selection:
+const handleBack = () => {
+  router.back(); // This will go back to select-policy screen
+};
 
   const toggleSummary = () => {
     const toValue = isExpanded ? 0 : 1;

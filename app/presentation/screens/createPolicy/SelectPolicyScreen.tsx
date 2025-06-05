@@ -8,7 +8,6 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
-  Dimensions,
   Image,
   Platform,
   ScrollView,
@@ -19,8 +18,7 @@ import {
   View,
 } from "react-native";
 import { usePolicy } from "../../contexts/PolicyContext";
-
-const { height: screenHeight } = Dimensions.get("window");
+import { useTravellerDetails } from "../../contexts/TravellerDetailsContext";
 
 export const SelectPolicyScreen: React.FC = () => {
   const { theme, isDarkMode } = useTheme();
@@ -28,6 +26,8 @@ export const SelectPolicyScreen: React.FC = () => {
   const params = useLocalSearchParams();
   const { selectedPlans, selectPlan, isLoading, error } = usePolicy();
   const { filteredPlans, isFilterActive, getFilterCount } = usePolicyFilter();
+  const { markTravellerPolicySelected, areAllTravellersComplete } =
+    useTravellerDetails();
 
   const travellerNumber = params.travellerNumber || "1";
   const travellerId = `traveller_${travellerNumber}`;
@@ -111,13 +111,17 @@ export const SelectPolicyScreen: React.FC = () => {
       return;
     }
 
-    router.push({
-      pathname: "/(createPolicy)/policy-review",
-      params: {
-        travellerNumber: travellerNumber,
-        selectedPlanId: selectedPlan.id,
-      },
-    });
+    // Mark policy as selected for this traveller
+    markTravellerPolicySelected(travellerId);
+
+    // Check if all travellers are complete
+    if (areAllTravellersComplete()) {
+      // All travellers have completed their details and policy selection
+      router.push("/(createPolicy)/policy-review");
+    } else {
+      // Navigate back to traveller selection to continue with other travellers
+      router.push("/(createPolicy)/traveller-selection");
+    }
   };
 
   const handleBack = () => {

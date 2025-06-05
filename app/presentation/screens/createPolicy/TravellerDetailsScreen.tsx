@@ -5,7 +5,7 @@ import { useTheme } from "@/app/presentation/contexts/ThemeContext";
 import { useTravellerDetails } from "@/app/presentation/contexts/TravellerDetailsContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Alert,
   Platform,
@@ -137,24 +137,49 @@ export const TravellerDetailsScreen: React.FC = () => {
   const { regions } = useMasterData();
 
   const {
-    formValues,
-    validationErrors,
+    travellers,
+    currentTravellerId,
+    setCurrentTraveller,
+    getCurrentTravellerData,
+    updateCurrentTravellerField,
+    validateCurrentTravellerForm,
+    markTravellerPersonalDetailsComplete,
+    expandedSections,
+    toggleSection,
     isLoading,
     error,
-    expandedSections,
-    updateField,
-    toggleSection,
     setLoading,
     setError,
-    validateForm,
   } = useTravellerDetails();
 
   const travellerId = params.travellerId as string;
   const travellerNumber = travellerId?.replace("traveller_", "") || "1";
+  const numberOfTravellers = parseInt(params.numberOfTravellers as string) || 1;
+
+  // Set current traveller when component mounts
+  useEffect(() => {
+    if (travellerId && travellerId !== currentTravellerId) {
+      setCurrentTraveller(travellerId);
+    }
+  }, [travellerId, currentTravellerId, setCurrentTraveller]);
+
+  const currentTravellerData = getCurrentTravellerData();
+  const formValues = currentTravellerData?.formValues;
+  const validationErrors = currentTravellerData?.validationErrors;
+
+  if (!currentTravellerData || !formValues || !validationErrors) {
+    return (
+      <View style={[styles.container, styles.centered, { backgroundColor: theme.colors.neutral.background }]}>
+        <Text style={[styles.loadingText, { color: theme.colors.neutral.gray600 }]}>
+          Loading traveller details...
+        </Text>
+      </View>
+    );
+  }
 
   const handleDatePress = () => {
     setCalendarCallback((selectedDate: string) => {
-      updateField("dateOfBirth", selectedDate);
+      updateCurrentTravellerField("dateOfBirth", selectedDate);
     });
     router.push({
       pathname: "/(createPolicy)/calendar",
@@ -170,7 +195,7 @@ export const TravellerDetailsScreen: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (!validateForm()) {
+    if (!validateCurrentTravellerForm()) {
       setError("Please fill in all required fields correctly");
       return;
     }
@@ -179,22 +204,23 @@ export const TravellerDetailsScreen: React.FC = () => {
     setError(null);
 
     try {
+      // Mark personal details as complete
+      markTravellerPersonalDetailsComplete(travellerId);
+
       // Calculate age from date of birth
       const birthDate = new Date(formValues.dateOfBirth);
       const today = new Date();
       const age = today.getFullYear() - birthDate.getFullYear();
 
       // Fetch plans for this traveller
-      // You'll need to get duration from trip context and category from somewhere
-      fetchPlans({
-        duration: 20, // Get from trip context
+      await fetchPlans({
+        duration: tripDetails.tripDays,
         age: age,
-        category:
-          regions?.find(
-            (reg) =>
-              reg?.name?.toLowerCase() == tripDetails?.region?.toLowerCase()
-          )?.id ?? "0", // This should come from somewhere
-        partnerId: user?.orgId == "0" ? "" : user?.orgId, // Default to 1 if orgId is 0
+        category: regions?.find(
+          (reg) =>
+            reg?.name?.toLowerCase() == tripDetails?.region?.toLowerCase()
+        )?.id ?? "0",
+        partnerId: user?.orgId == "0" ? "" : user?.orgId,
       });
 
       // Navigate to policy selection screen
@@ -317,7 +343,7 @@ export const TravellerDetailsScreen: React.FC = () => {
             label="Passport Number"
             placeholder="eg. A1234567"
             value={formValues.passportNumber}
-            onChangeText={(text) => updateField("passportNumber", text)}
+            onChangeText={(text) => updateCurrentTravellerField("passportNumber", text)}
             error={validationErrors.passportNumber}
           />
 
@@ -325,7 +351,7 @@ export const TravellerDetailsScreen: React.FC = () => {
             label="Full Name"
             placeholder="eg. John Doe"
             value={formValues.fullName}
-            onChangeText={(text) => updateField("fullName", text)}
+            onChangeText={(text) => updateCurrentTravellerField("fullName", text)}
             error={validationErrors.fullName}
           />
 
@@ -353,7 +379,7 @@ export const TravellerDetailsScreen: React.FC = () => {
                           : theme.colors.neutral.gray300,
                     },
                   ]}
-                  onPress={() => updateField("gender", gender as any)}
+                  onPress={() => updateCurrentTravellerField("gender", gender as any)}
                 >
                   <Text
                     style={[
@@ -432,7 +458,7 @@ export const TravellerDetailsScreen: React.FC = () => {
             label="Address Line 1"
             placeholder="eg. 123 Main Street"
             value={formValues.addressLine1}
-            onChangeText={(text) => updateField("addressLine1", text)}
+            onChangeText={(text) => updateCurrentTravellerField("addressLine1", text)}
             error={validationErrors.addressLine1}
           />
 
@@ -440,7 +466,7 @@ export const TravellerDetailsScreen: React.FC = () => {
             label="Address Line 2"
             placeholder="eg. Apartment 4B"
             value={formValues.addressLine2}
-            onChangeText={(text) => updateField("addressLine2", text)}
+            onChangeText={(text) => updateCurrentTravellerField("addressLine2", text)}
             error={validationErrors.addressLine2}
           />
 
@@ -448,7 +474,7 @@ export const TravellerDetailsScreen: React.FC = () => {
             label="Pincode"
             placeholder="eg. 400001"
             value={formValues.pincode}
-            onChangeText={(text) => updateField("pincode", text)}
+            onChangeText={(text) => updateCurrentTravellerField("pincode", text)}
             error={validationErrors.pincode}
             keyboardType="numeric"
           />
@@ -457,7 +483,7 @@ export const TravellerDetailsScreen: React.FC = () => {
             label="City"
             placeholder="eg. Mumbai"
             value={formValues.city}
-            onChangeText={(text) => updateField("city", text)}
+            onChangeText={(text) => updateCurrentTravellerField("city", text)}
             error={validationErrors.city}
           />
 
@@ -465,7 +491,7 @@ export const TravellerDetailsScreen: React.FC = () => {
             label="District"
             placeholder="eg. Mumbai City"
             value={formValues.district}
-            onChangeText={(text) => updateField("district", text)}
+            onChangeText={(text) => updateCurrentTravellerField("district", text)}
             error={validationErrors.district}
           />
 
@@ -474,7 +500,7 @@ export const TravellerDetailsScreen: React.FC = () => {
             placeholder="Select State"
             options={stateOptions}
             value={formValues.state}
-            onSelect={(value) => updateField("state", value)}
+            onSelect={(value) => updateCurrentTravellerField("state", value)}
             error={validationErrors.state}
           />
 
@@ -483,7 +509,7 @@ export const TravellerDetailsScreen: React.FC = () => {
             placeholder="Select Country"
             options={countryOptions}
             value={formValues.country}
-            onSelect={(value) => updateField("country", value)}
+            onSelect={(value) => updateCurrentTravellerField("country", value)}
             error={validationErrors.country}
           />
 
@@ -491,7 +517,7 @@ export const TravellerDetailsScreen: React.FC = () => {
             label="Email Address"
             placeholder="eg. john@example.com"
             value={formValues.emailAddress}
-            onChangeText={(text) => updateField("emailAddress", text)}
+            onChangeText={(text) => updateCurrentTravellerField("emailAddress", text)}
             error={validationErrors.emailAddress}
             keyboardType="email-address"
             autoCapitalize="none"
@@ -501,7 +527,7 @@ export const TravellerDetailsScreen: React.FC = () => {
             label="Mobile Number"
             placeholder="eg. 9876543210"
             value={formValues.mobileNumber}
-            onChangeText={(text) => updateField("mobileNumber", text)}
+            onChangeText={(text) => updateCurrentTravellerField("mobileNumber", text)}
             error={validationErrors.mobileNumber}
             keyboardType="phone-pad"
           />
@@ -524,7 +550,7 @@ export const TravellerDetailsScreen: React.FC = () => {
             label="Nominee Name"
             placeholder="eg. Jane Doe"
             value={formValues.nomineeName}
-            onChangeText={(text) => updateField("nomineeName", text)}
+            onChangeText={(text) => updateCurrentTravellerField("nomineeName", text)}
             error={validationErrors.nomineeName}
           />
 
@@ -533,7 +559,7 @@ export const TravellerDetailsScreen: React.FC = () => {
             placeholder="Select Relationship"
             options={relationshipOptions}
             value={formValues.relationshipWithNominee}
-            onSelect={(value) => updateField("relationshipWithNominee", value)}
+            onSelect={(value) => updateCurrentTravellerField("relationshipWithNominee", value)}
             error={validationErrors.relationshipWithNominee}
           />
         </CollapsibleSection>
@@ -551,7 +577,7 @@ export const TravellerDetailsScreen: React.FC = () => {
             label="Emergency Contact Person Name"
             placeholder="eg. Emergency Contact"
             value={formValues.emergencyContactName}
-            onChangeText={(text) => updateField("emergencyContactName", text)}
+            onChangeText={(text) => updateCurrentTravellerField("emergencyContactName", text)}
             error={validationErrors.emergencyContactName}
           />
 
@@ -559,7 +585,7 @@ export const TravellerDetailsScreen: React.FC = () => {
             label="Mobile Number"
             placeholder="eg. 9876543210"
             value={formValues.emergencyMobileNumber}
-            onChangeText={(text) => updateField("emergencyMobileNumber", text)}
+            onChangeText={(text) => updateCurrentTravellerField("emergencyMobileNumber", text)}
             error={validationErrors.emergencyMobileNumber}
             keyboardType="phone-pad"
           />
@@ -568,7 +594,7 @@ export const TravellerDetailsScreen: React.FC = () => {
             label="Email Address"
             placeholder="eg. emergency@example.com"
             value={formValues.emergencyEmailAddress}
-            onChangeText={(text) => updateField("emergencyEmailAddress", text)}
+            onChangeText={(text) => updateCurrentTravellerField("emergencyEmailAddress", text)}
             error={validationErrors.emergencyEmailAddress}
             keyboardType="email-address"
             autoCapitalize="none"
@@ -607,7 +633,7 @@ export const TravellerDetailsScreen: React.FC = () => {
             label="Remark"
             placeholder="Any additional remarks"
             value={formValues.remark}
-            onChangeText={(text) => updateField("remark", text)}
+            onChangeText={(text) => updateCurrentTravellerField("remark", text)}
             error={validationErrors.remark}
             multiline
             numberOfLines={3}
@@ -617,7 +643,7 @@ export const TravellerDetailsScreen: React.FC = () => {
             label="CR Reference Number"
             placeholder="eg. CR123456"
             value={formValues.crReferenceNumber}
-            onChangeText={(text) => updateField("crReferenceNumber", text)}
+            onChangeText={(text) => updateCurrentTravellerField("crReferenceNumber", text)}
             error={validationErrors.crReferenceNumber}
           />
 
@@ -625,7 +651,7 @@ export const TravellerDetailsScreen: React.FC = () => {
             label="Past Illness"
             placeholder="Any past medical conditions"
             value={formValues.pastIllness}
-            onChangeText={(text) => updateField("pastIllness", text)}
+            onChangeText={(text) => updateCurrentTravellerField("pastIllness", text)}
             error={validationErrors.pastIllness}
             multiline
             numberOfLines={3}
@@ -635,7 +661,7 @@ export const TravellerDetailsScreen: React.FC = () => {
             label="GST Number"
             placeholder="eg. 27AAAFG1234L1ZM"
             value={formValues.gstNumber}
-            onChangeText={(text) => updateField("gstNumber", text)}
+            onChangeText={(text) => updateCurrentTravellerField("gstNumber", text)}
             error={validationErrors.gstNumber}
           />
 
@@ -644,7 +670,7 @@ export const TravellerDetailsScreen: React.FC = () => {
             placeholder="Select GST State"
             options={stateOptions}
             value={formValues.gstState}
-            onSelect={(value) => updateField("gstState", value)}
+            onSelect={(value) => updateCurrentTravellerField("gstState", value)}
           />
         </CollapsibleSection>
       </ScrollView>
@@ -676,6 +702,14 @@ export const TravellerDetailsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  centered: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 16,
+    fontWeight: '500',
   },
   header: {
     flexDirection: "row",

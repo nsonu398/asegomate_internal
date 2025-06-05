@@ -54,7 +54,7 @@ export const Button: React.FC<ButtonProps> = ({
 }) => {
   const getBackgroundColor = (): string => {
     if (variant === "text" || variant === "outlined") return "transparent";
-    if (disabled) return theme.colors.neutral.gray600;
+    if (disabled) return theme.colors.neutral.gray300;
 
     switch (color) {
       case "primary":
