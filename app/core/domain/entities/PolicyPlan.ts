@@ -47,6 +47,7 @@ export interface PolicyPlan {
   riders: any[];
   assistantServices: string;
   vasProductList: VasProduct[];
+  isRecomended: boolean;
   
   // Added for UI purposes
   isSelected?: boolean;

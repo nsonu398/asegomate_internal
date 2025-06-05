@@ -3,6 +3,7 @@ import { Stack } from "expo-router";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { PolicyProvider } from "../presentation/contexts/PolicyContext";
+import { PolicyFilterProvider } from "../presentation/contexts/PolicyFilterContext";
 import { useTheme } from "../presentation/contexts/ThemeContext";
 import { TravellerDetailsProvider } from "../presentation/contexts/TravellerDetailsContext";
 import { TripDetailsProvider } from "../presentation/contexts/TripDetailsContext";
@@ -24,10 +25,10 @@ function CreatePolicyNavigation() {
       <Stack.Screen name="traveller-selection" />
       <Stack.Screen name="traveller-details" />
       <Stack.Screen name="select-policy" />
+      <Stack.Screen name="policy-filter" />
       <Stack.Screen name="add-ons-selection" />
       <Stack.Screen name="policy-review" />
       <Stack.Screen name="policy-payment" />
-      {/* Add other screens as needed */}
     </Stack>
   );
 }
@@ -39,7 +40,9 @@ export default function CreatePolicyLayout() {
       <PolicyProvider>
         <TripDetailsProvider>
           <TravellerDetailsProvider>
-            <CreatePolicyNavigation />
+            <PolicyFilterProvider>
+              <CreatePolicyNavigation />
+            </PolicyFilterProvider>
           </TravellerDetailsProvider>
         </TripDetailsProvider>
       </PolicyProvider>
